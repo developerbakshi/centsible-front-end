@@ -1,0 +1,59 @@
+.settings-sheet .card {
+  padding: 14px 0;
+  border-top: 1px solid var(--line);
+}
+
+.settings-sheet .row2 {
+  display: flex;
+  justify-content: space-between;
+  color: var(--mute);
+  font-size: 14px;
+}
+
+.settings-total {
+  padding: 8px 2px;
+}
+
+.settings-categories {
+  margin-top: 12px;
+}
+
+.settings-rows {
+  margin-bottom: 4px;
+}
+
+.srow {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 92px 44px;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.srow input {
+  min-width: 0;
+  text-align: center;
+}
+
+.srow input:nth-child(2) {
+  text-align: left;
+}
+
+.warnbox {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgb(194 103 10 / 14%);
+  color: var(--warn);
+  font-size: 14px;
+  margin: 8px 0;
+}
+
+.settings-error {
+  margin-top: 8px;
+}
+
+.settings-reset {
+  width: 100%;
+  color: var(--bad);
+  margin-top: 8px;
+}

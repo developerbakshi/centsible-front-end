@@ -1,0 +1,39 @@
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px -apple-system, system-ui, "SF Pro Text", sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+#app {
+  height: 100dvh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--bg);
+  color: var(--ink);
+  padding: calc(env(safe-area-inset-top, 0px) + 6px) 22px
+    calc(env(safe-area-inset-bottom, 0px) + 110px);
+}

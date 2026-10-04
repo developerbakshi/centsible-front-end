@@ -1,0 +1,44 @@
+.category-sheet .card {
+  padding: 14px 0;
+  border-top: 1px solid var(--line);
+}
+
+.category-sheet .card.sl {
+  margin-top: 0;
+}
+
+.category-sheet .expense-list {
+  margin-top: 12px;
+  padding: 8px 14px;
+}
+
+.exp {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.exp:last-child {
+  border: 0;
+}
+
+.exp .m {
+  flex: 1;
+  text-align: left;
+}
+
+.exp b {
+  font-size: 20px;
+  font-weight: 300;
+}
+
+.exp small {
+  display: block;
+  color: var(--mute);
+}
+
+.x {
+  font-size: 18px;
+}
