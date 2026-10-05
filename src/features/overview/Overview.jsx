@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useAppState } from "../../state/AppContext.jsx";
 import { formatCurrency, formatCurrencyWithCents } from "../../utils/currency.js";
+import { formatCategoryName } from "../../utils/category.js";
 import {
   daysInMonth,
-  formatMonthLabel,
+  formatShortMonthLabel,
   getDaysLeft,
   monthKey,
   shiftMonth,
@@ -237,7 +238,7 @@ function CategoryRow({ category, spent, pace, animationKey, onSelect }) {
       onClick={() => onSelect(category.id)}
     >
       <div className="top">
-        <span className="nm">{category.name}</span>
+        <span className="nm">{formatCategoryName(category.name)}</span>
         <span className="of">of {formatCurrency(category.limit)}</span>
       </div>
       <ProgressBar
@@ -296,7 +297,7 @@ function Overview({ onSelectCategory, onOpenSettings }) {
           >
             ‹
           </button>
-          {formatMonthLabel(state.currentMonth)}
+          {formatShortMonthLabel(state.currentMonth)}
           <button
             type="button"
             aria-label="Next month"

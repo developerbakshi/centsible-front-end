@@ -1,4 +1,3 @@
-import { createSeedData } from "../constants/defaultData.js";
 import { monthKey } from "../utils/date.js";
 
 function ensureMonth(months, key) {
@@ -20,11 +19,9 @@ function ensureMonth(months, key) {
 }
 
 export function createInitialState() {
-  const data = createSeedData();
-
   return {
-    data,
-    currentMonth: Object.keys(data.months)[0],
+    data: { theme: "", months: {} },
+    currentMonth: monthKey(new Date()),
     themeError: null,
     storageStatus: "loading",
     storageError: null,
@@ -66,7 +63,8 @@ export function appReducer(state, action) {
       return {
         ...state,
         storageStatus: "load-error",
-        storageError: "Could not load saved expenses from this device.",
+        storageError:
+          action.message || "Could not load categories from the server.",
       };
     case "storage/save-error":
       return {

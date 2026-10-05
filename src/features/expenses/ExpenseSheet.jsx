@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useAppState } from "../../state/AppContext.jsx";
+import { formatCategoryName } from "../../utils/category.js";
 import { parseDollarAmount } from "../../utils/currency.js";
 import { daysInMonth, monthKey, padDatePart } from "../../utils/date.js";
 import "./expenses.css";
@@ -146,10 +147,11 @@ function ExpenseSheet({
             type="button"
             key={category.id}
             aria-pressed={category.id === categoryId}
+            aria-label={formatCategoryName(category.name)}
             onClick={() => setCategoryId(category.id)}
           >
             <i>{category.emoji}</i>
-            {category.name}
+            {formatCategoryName(category.name)}
           </button>
         ))}
       </div>

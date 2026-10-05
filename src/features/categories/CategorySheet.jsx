@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useAppState } from "../../state/AppContext.jsx";
 import { formatCurrencyWithCents } from "../../utils/currency.js";
+import { formatCategoryName } from "../../utils/category.js";
 import { formatDateDDMMYYYY } from "../../utils/date.js";
 import "./categories.css";
 
@@ -45,7 +46,7 @@ function CategorySheet({ categoryId, onClose, onAdd, onEdit }) {
     <div className="category-sheet">
       <div className="sh-h">
         <span>
-          {category.emoji} {category.name}
+          {category.emoji} {formatCategoryName(category.name)}
         </span>
         <button className="link" type="button" onClick={onClose}>
           Done

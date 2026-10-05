@@ -28,6 +28,14 @@ export function formatMonthLabel(key) {
   });
 }
 
+export function formatShortMonthLabel(key) {
+  const [year, month] = key.split("-").map(Number);
+  return new Date(year, month - 1, 1).toLocaleDateString("en-US", {
+    month: "short",
+    year: "numeric",
+  });
+}
+
 export function formatDateDDMMYYYY(value) {
   const [year, month, day] = value.split("-");
   return `${day}-${month}-${year}`;

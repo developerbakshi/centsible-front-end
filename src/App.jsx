@@ -12,47 +12,61 @@ function App() {
 
   return (
     <div id="app" data-theme={state.data.theme || undefined}>
-      <Overview
-        onOpenSettings={() => setActiveSheet({ type: "settings" })}
-        onSelectCategory={(categoryId) =>
-          setActiveSheet({ type: "category", categoryId })
-        }
-      />
-      <button
-        className="fab"
-        type="button"
-        disabled={state.storageStatus === "loading"}
-        onClick={() => setActiveSheet({ type: "expense" })}
-      >
-        <b>+</b>Add expense
-      </button>
-      <BottomSheet
-        open={Boolean(activeSheet)}
-        onClose={() => setActiveSheet(null)}
-      >
-        {activeSheet?.type === "category" && (
-          <CategorySheet
-            categoryId={activeSheet.categoryId}
-            onClose={() => setActiveSheet(null)}
-            onAdd={(categoryId) =>
-              setActiveSheet({ type: "expense", preselectedCategoryId: categoryId })
-            }
-            onEdit={(expenseId) =>
-              setActiveSheet({ type: "expense", expenseId })
+      {state.storageStatus === "loading" ? (
+        <div className="app-state" role="status">
+          Loading categories…
+        </div>
+      ) : state.storageStatus === "load-error" ? (
+        <div className="app-state bad" role="alert">
+          {state.storageError} Refresh the page to try again.
+        </div>
+      ) : (
+        <>
+          <Overview
+            onOpenSettings={() => setActiveSheet({ type: "settings" })}
+            onSelectCategory={(categoryId) =>
+              setActiveSheet({ type: "category", categoryId })
             }
           />
-        )}
-        {activeSheet?.type === "expense" && (
-          <ExpenseSheet
-            expenseId={activeSheet.expenseId}
-            preselectedCategoryId={activeSheet.preselectedCategoryId}
+          <button
+            className="fab"
+            type="button"
+            onClick={() => setActiveSheet({ type: "expense" })}
+          >
+            <b>+</b>Add expense
+          </button>
+          <BottomSheet
+            open={Boolean(activeSheet)}
             onClose={() => setActiveSheet(null)}
-          />
-        )}
-        {activeSheet?.type === "settings" && (
-          <SettingsSheet onClose={() => setActiveSheet(null)} />
-        )}
-      </BottomSheet>
+          >
+            {activeSheet?.type === "category" && (
+              <CategorySheet
+                categoryId={activeSheet.categoryId}
+                onClose={() => setActiveSheet(null)}
+                onAdd={(categoryId) =>
+                  setActiveSheet({
+                    type: "expense",
+                    preselectedCategoryId: categoryId,
+                  })
+                }
+                onEdit={(expenseId) =>
+                  setActiveSheet({ type: "expense", expenseId })
+                }
+              />
+            )}
+            {activeSheet?.type === "expense" && (
+              <ExpenseSheet
+                expenseId={activeSheet.expenseId}
+                preselectedCategoryId={activeSheet.preselectedCategoryId}
+                onClose={() => setActiveSheet(null)}
+              />
+            )}
+            {activeSheet?.type === "settings" && (
+              <SettingsSheet onClose={() => setActiveSheet(null)} />
+            )}
+          </BottomSheet>
+        </>
+      )}
     </div>
   );
 }

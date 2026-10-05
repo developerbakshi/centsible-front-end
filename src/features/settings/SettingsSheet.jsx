@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useAppState } from "../../state/AppContext.jsx";
+import { formatCategoryName } from "../../utils/category.js";
 import { formatCurrency } from "../../utils/currency.js";
 import { formatMonthLabel } from "../../utils/date.js";
 import "./settings.css";
@@ -123,6 +124,11 @@ function SettingsSheet({ onClose }) {
     0,
   );
   const difference = month.budget - categoryLimitTotal;
+  const sortedCategories = [...categories].sort(
+    (first, second) =>
+      (Number.parseFloat(second.limitValue) || 0) -
+      (Number.parseFloat(first.limitValue) || 0),
+  );
 
   return (
     <div className="settings-sheet">
@@ -155,19 +161,19 @@ function SettingsSheet({ onClose }) {
       </div>
       <div className="card settings-categories">
         <div className="settings-rows">
-          {categories.map((category) => (
+          {sortedCategories.map((category) => (
             <div className="srow" data-id={category.id} key={category.id}>
               <input
                 className="f"
-                aria-label={`${category.name || "Category"} emoji`}
+                aria-label={`${formatCategoryName(category.name || "Category")} emoji`}
                 value={category.emoji}
                 onChange={(event) =>
                   handleCategoryChange(category.id, "emoji", event.target.value)
                 }
               />
               <input
-                className="f"
-                aria-label={`${category.name || "Category"} name`}
+                className="f settings-category-name"
+                aria-label={`${formatCategoryName(category.name || "Category")} name`}
                 value={category.name}
                 onChange={(event) =>
                   handleCategoryChange(category.id, "name", event.target.value)
@@ -176,7 +182,7 @@ function SettingsSheet({ onClose }) {
               <input
                 className="f"
                 inputMode="decimal"
-                aria-label={`${category.name || "Category"} limit`}
+                aria-label={`${formatCategoryName(category.name || "Category")} limit`}
                 value={category.limitValue}
                 onChange={(event) =>
                   handleCategoryChange(category.id, "limit", event.target.value)
@@ -184,7 +190,9 @@ function SettingsSheet({ onClose }) {
               />
               <button
                 type="button"
-                aria-label={`Delete ${category.name || "category"}`}
+                aria-label={`Delete ${formatCategoryName(category.name || "category")} (temporarily unavailable)`}
+                title="Category deletion is temporarily unavailable"
+                disabled
                 onClick={() => handleDeleteCategory(category.id)}
               >
                 🗑
@@ -192,9 +200,14 @@ function SettingsSheet({ onClose }) {
             </div>
           ))}
         </div>
+        <div className="settings-category-help">
+          Adding and deleting categories are temporarily unavailable.
+        </div>
         <button
-          className="link"
+          className="link settings-add-category"
           type="button"
+          title="Adding categories is temporarily unavailable"
+          disabled
           onClick={handleAddCategory}
         >
           + Add category

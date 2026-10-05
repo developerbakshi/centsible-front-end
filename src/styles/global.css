@@ -37,3 +37,9 @@ button {
   padding: calc(env(safe-area-inset-top, 0px) + 6px) 22px
     calc(env(safe-area-inset-bottom, 0px) + 110px);
 }
+
+.app-state {
+  padding-top: 36px;
+  color: var(--mute);
+  text-align: center;
+}

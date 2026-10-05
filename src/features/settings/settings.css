@@ -39,6 +39,22 @@
   text-align: left;
 }
 
+.settings-category-name {
+  text-transform: capitalize;
+}
+
+.settings-sheet .srow button:disabled,
+.settings-add-category:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.settings-category-help {
+  margin: 2px 0 8px;
+  color: var(--mute);
+  font-size: 12px;
+}
+
 .warnbox {
   padding: 10px 12px;
   border-radius: 12px;

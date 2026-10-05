@@ -9,10 +9,8 @@ import React, {
   useState,
 } from "react";
 import { appReducer, createInitialState } from "./appReducer.js";
-import {
-  loadAppData,
-  saveAppData,
-} from "../services/storage/appDataService.js";
+import { saveAppData } from "../services/storage/appDataService.js";
+import { getCategories } from "../services/categories/categoryService.js";
 import {
   addExpense as addExpenseService,
   deleteExpense as deleteExpenseService,
@@ -52,17 +50,32 @@ export function AppProvider({ children }) {
 
     async function initializeData() {
       try {
-        const savedData = await loadAppData();
+        const categories = await getCategories();
         if (!active) return;
 
-        if (savedData) {
-          dispatch({ type: "data/load", data: savedData });
-        } else {
-          await saveAppData(state.data);
-          if (active) dispatch({ type: "storage/ready" });
+        const key = monthKey(new Date());
+        const data = {
+          theme: "",
+          months: {
+            [key]: {
+              budget: categories.reduce(
+                (total, category) => total + category.limit,
+                0,
+              ),
+              cats: categories,
+              exp: [],
+            },
+          },
+        };
+        await saveAppData(data);
+        if (active) dispatch({ type: "data/load", data });
+      } catch (error) {
+        if (active) {
+          dispatch({
+            type: "storage/load-error",
+            message: error.message,
+          });
         }
-      } catch {
-        if (active) dispatch({ type: "storage/load-error" });
       }
     }
 
