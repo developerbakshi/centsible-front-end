@@ -28,9 +28,15 @@ function App() {
               setActiveSheet({ type: "category", categoryId })
             }
           />
+          <div className="fab-hint">
+            Adding expenses is temporarily unavailable.
+          </div>
           <button
             className="fab"
             type="button"
+            aria-label="Add expense (temporarily unavailable)"
+            title="Adding expenses is temporarily unavailable"
+            disabled
             onClick={() => setActiveSheet({ type: "expense" })}
           >
             <b>+</b>Add expense

@@ -11,6 +11,7 @@ import React, {
 import { appReducer, createInitialState } from "./appReducer.js";
 import { saveAppData } from "../services/storage/appDataService.js";
 import { getCategories } from "../services/categories/categoryService.js";
+import { getExpenses } from "../services/expenses/expenseService.js";
 import {
   addExpense as addExpenseService,
   deleteExpense as deleteExpenseService,
@@ -50,22 +51,42 @@ export function AppProvider({ children }) {
 
     async function initializeData() {
       try {
-        const categories = await getCategories();
+        const [categories, expenses] = await Promise.all([
+          getCategories(),
+          getExpenses(),
+        ]);
         if (!active) return;
 
         const key = monthKey(new Date());
+        const budget = categories.reduce(
+          (total, category) => total + category.limit,
+          0,
+        );
+        const months = {
+          [key]: { budget, cats: categories, exp: [] },
+        };
+        expenses.forEach((expense) => {
+          if (!categories.some(({ id }) => id === expense.categoryId)) {
+            throw new Error(
+              `Expense ${expense.id} references an unknown category.`,
+            );
+          }
+
+          const expenseMonth = expense.date.slice(0, 7);
+          if (!months[expenseMonth]) {
+            months[expenseMonth] = { budget, cats: categories, exp: [] };
+          }
+          months[expenseMonth].exp.push({
+            id: expense.id,
+            cat: expense.categoryId,
+            amt: expense.amount,
+            date: expense.date,
+            note: expense.note,
+          });
+        });
         const data = {
           theme: "",
-          months: {
-            [key]: {
-              budget: categories.reduce(
-                (total, category) => total + category.limit,
-                0,
-              ),
-              cats: categories,
-              exp: [],
-            },
-          },
+          months,
         };
         await saveAppData(data);
         if (active) dispatch({ type: "data/load", data });

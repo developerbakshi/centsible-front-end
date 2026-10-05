@@ -42,3 +42,16 @@
 .x {
   font-size: 18px;
 }
+
+.x:disabled,
+.category-sheet .save:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.expense-action-help {
+  margin: 8px 0 2px;
+  color: var(--mute);
+  font-size: 12px;
+  text-align: center;
+}
