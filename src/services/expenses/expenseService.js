@@ -32,13 +32,18 @@ function normalizeExpense(expense) {
     !Number.isInteger(expense.category_id) ||
     !Number.isFinite(expense.amount) ||
     expense.amount < 0 ||
-    typeof expense.expense_date !== "string"
+    typeof expense.expense_date !== "string" ||
+    typeof expense.created_at !== "string"
   ) {
     throw new Error("The expenses API returned an invalid expense.");
   }
 
   const dateValue = new Date(expense.expense_date);
-  if (Number.isNaN(dateValue.getTime())) {
+  const createdAt = new Date(expense.created_at);
+  if (
+    Number.isNaN(dateValue.getTime()) ||
+    Number.isNaN(createdAt.getTime())
+  ) {
     throw new Error("The expenses API returned an invalid expense date.");
   }
 
@@ -52,6 +57,7 @@ function normalizeExpense(expense) {
     categoryId: String(expense.category_id),
     amount: Math.round(expense.amount * 100) / 100,
     date,
+    createdAt: createdAt.toISOString(),
     merchant: typeof expense.merchant === "string" ? expense.merchant : "",
     bank: typeof expense.bank === "string" ? expense.bank : "",
     note,

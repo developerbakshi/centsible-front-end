@@ -1,7 +1,7 @@
 import React from "react";
 import "./bottomSheet.css";
 
-function BottomSheet({ open, onClose, children }) {
+function BottomSheet({ open, onClose, children, className = "" }) {
   return (
     <>
       <div
@@ -10,7 +10,7 @@ function BottomSheet({ open, onClose, children }) {
         onClick={onClose}
       />
       <section
-        className={`sheet${open ? " on" : ""}`}
+        className={`sheet${className ? ` ${className}` : ""}${open ? " on" : ""}`}
         role={open ? "dialog" : undefined}
         aria-modal={open ? "true" : undefined}
         aria-hidden={!open}

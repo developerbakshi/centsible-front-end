@@ -21,9 +21,11 @@ function ExpenseSheet({
   onClose,
   preselectedCategoryId = null,
   expenseId = null,
+  expenseMonthKey = null,
 }) {
   const { state, addExpense, updateExpense } = useAppState();
-  const month = state.data.months[state.currentMonth];
+  const selectedMonthKey = expenseMonthKey || state.currentMonth;
+  const month = state.data.months[selectedMonthKey];
   const expense = expenseId
     ? month.exp.find((item) => item.id === expenseId)
     : null;
@@ -34,15 +36,15 @@ function ExpenseSheet({
     () => expense?.cat || preselectedCategoryId,
   );
   const [date, setDate] = useState(() =>
-    expense ? expense.date : getDefaultDate(state.currentMonth),
+    expense ? expense.date : getDefaultDate(selectedMonthKey),
   );
   const [note, setNote] = useState(() => expense?.note || "");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const amountRef = useRef(null);
-  const [year, monthNumber] = state.currentMonth.split("-").map(Number);
-  const minDate = `${state.currentMonth}-01`;
-  const maxDate = `${state.currentMonth}-${padDatePart(
+  const [year, monthNumber] = selectedMonthKey.split("-").map(Number);
+  const minDate = `${selectedMonthKey}-01`;
+  const maxDate = `${selectedMonthKey}-${padDatePart(
     daysInMonth(year, monthNumber),
   )}`;
 
@@ -94,7 +96,7 @@ function ExpenseSheet({
       if (expenseId) {
         await updateExpense({
           ...values,
-          monthKey: state.currentMonth,
+          monthKey: selectedMonthKey,
           expenseId,
         });
       } else {
