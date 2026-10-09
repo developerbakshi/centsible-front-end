@@ -81,6 +81,7 @@ export function AppProvider({ children }) {
             cat: expense.categoryId,
             amt: expense.amount,
             date: expense.date,
+            time: expense.time,
             createdAt: expense.createdAt,
             merchant: expense.merchant,
             bank: expense.bank,

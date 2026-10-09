@@ -51,12 +51,19 @@ function normalizeExpense(expense) {
   const note = [expense.merchant, expense.bank]
     .filter((value) => typeof value === "string" && value.trim())
     .join(" · ");
+  const time = /[T ]\d{2}:\d{2}/.test(expense.expense_date)
+    ? dateValue.toLocaleTimeString(undefined, {
+        hour: "numeric",
+        minute: "2-digit",
+      })
+    : "";
 
   return {
     id: String(expense.id),
     categoryId: String(expense.category_id),
     amount: Math.round(expense.amount * 100) / 100,
     date,
+    time,
     createdAt: createdAt.toISOString(),
     merchant: typeof expense.merchant === "string" ? expense.merchant : "",
     bank: typeof expense.bank === "string" ? expense.bank : "",

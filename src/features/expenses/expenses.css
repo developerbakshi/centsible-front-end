@@ -107,7 +107,12 @@ input.f {
   width: 100%;
   min-width: 0;
   max-width: 100%;
+  text-align: left;
   margin-bottom: 8px;
+}
+
+.date-field::-webkit-date-and-time-value {
+  text-align: left;
 }
 
 .expense-field-help {
@@ -152,8 +157,17 @@ input.f {
   display: flex;
   width: 100%;
   align-items: baseline;
-  justify-content: space-between;
   gap: 12px;
+}
+
+.all-expense-main {
+  justify-content: space-between;
+}
+
+.all-expense-meta {
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
 }
 
 .all-expense-row:active {
@@ -174,17 +188,57 @@ input.f {
   font-weight: 600;
 }
 
-.all-expense-meta,
-.all-expense-bank,
-.all-expense-created {
+.all-expense-meta {
   margin-top: 4px;
   color: var(--mute);
   font-size: 12px;
 }
 
-.all-expense-meta span:last-child {
+.all-expense-bank,
+.all-expense-date,
+.all-expense-time,
+.all-expense-separator {
+  color: var(--mute);
+  font-size: 12px;
+}
+
+.all-expense-category {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+.all-expense-category-icon {
+  font-size: 13px;
+}
+
+.all-expense-category-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.all-expense-bank {
+  flex: 0 0 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.all-expense-separator {
+  flex: 0 0 auto;
+  margin: 0 -4px;
+}
+
+.all-expense-date {
   flex: 0 0 auto;
   text-align: right;
+}
+
+.all-expense-time {
+  flex: 0 0 auto;
 }
 
 .chips {

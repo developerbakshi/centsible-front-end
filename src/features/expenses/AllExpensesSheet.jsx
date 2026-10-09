@@ -5,16 +5,6 @@ import { formatCurrencyWithCents } from "../../utils/currency.js";
 import { formatDateDDMMYYYY } from "../../utils/date.js";
 import "./expenses.css";
 
-function formatCreatedAt(value) {
-  return new Date(value).toLocaleString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
-}
-
 function AllExpensesSheet({ onClose, onEdit }) {
   const { state } = useAppState();
   const expenses = useMemo(
@@ -60,21 +50,41 @@ function AllExpensesSheet({ onClose, onEdit }) {
                 <b>{formatCurrencyWithCents(expense.amt)}</b>
               </span>
               <span className="all-expense-meta">
-                <span>
-                  {expense.category
-                    ? `${expense.category.emoji} ${formatCategoryName(expense.category.name)}`
-                    : "Category unavailable"}
+                <span className="all-expense-category">
+                  {expense.category && (
+                    <span
+                      className="all-expense-category-icon"
+                      aria-hidden="true"
+                    >
+                      {expense.category.emoji}
+                    </span>
+                  )}
+                  <span className="all-expense-category-name">
+                    {expense.category
+                      ? formatCategoryName(expense.category.name)
+                      : "Category unavailable"}
+                  </span>
                 </span>
-                <span>Expense date {formatDateDDMMYYYY(expense.date)}</span>
+                {expense.bank && (
+                  <>
+                    <span className="all-expense-bank">{expense.bank}</span>
+                    <span className="all-expense-separator" aria-hidden="true">
+                      ·
+                    </span>
+                  </>
+                )}
+                <span className="all-expense-date">
+                  {formatDateDDMMYYYY(expense.date)}
+                </span>
+                {expense.time && (
+                  <>
+                    <span className="all-expense-separator" aria-hidden="true">
+                      ·
+                    </span>
+                    <span className="all-expense-time">{expense.time}</span>
+                  </>
+                )}
               </span>
-              {expense.bank && (
-                <span className="all-expense-bank">{expense.bank}</span>
-              )}
-              {expense.createdAt && (
-                <span className="all-expense-created">
-                  Created {formatCreatedAt(expense.createdAt)}
-                </span>
-              )}
             </button>
           ))
         ) : (
