@@ -1,4 +1,4 @@
-const CATEGORIES_URL = "https://api-centsible.onrender.com/categories";
+const CATEGORIES_URL = "https://api-centsible.vercel.app/categories";
 
 function normalizeCategory(category) {
   if (

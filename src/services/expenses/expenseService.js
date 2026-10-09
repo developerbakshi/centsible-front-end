@@ -1,6 +1,6 @@
 import { monthKey, padDatePart } from "../../utils/date.js";
 
-const EXPENSES_URL = "https://api-centsible.onrender.com/expenses";
+const EXPENSES_URL = "https://api-centsible.vercel.app/expenses";
 
 export async function updateExpense(expenseId, changes) {
   if (Object.keys(changes).length === 0) return;
