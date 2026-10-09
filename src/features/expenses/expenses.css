@@ -68,8 +68,12 @@
   min-width: 0;
 }
 
-.expense-form input {
+.expense-form input.f {
+  display: block;
+  box-sizing: border-box;
+  inline-size: 100%;
   min-width: 0;
+  max-width: 100%;
   max-width: 100%;
 }
 
@@ -104,7 +108,7 @@ input.f {
 
 .date-field {
   display: block;
-  width: 100%;
+  inline-size: 100%;
   min-width: 0;
   max-width: 100%;
   text-align: left;
@@ -112,6 +116,8 @@ input.f {
 }
 
 .date-field::-webkit-date-and-time-value {
+  width: 100%;
+  margin: 0;
   text-align: left;
 }
 

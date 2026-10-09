@@ -1,13 +1,20 @@
 .overview-header {
   display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.overview-header-top {
+  display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
 .word {
-  font-size: 22px;
+  font-size: 26px;
   letter-spacing: -0.6px;
-  font-weight: 300;
+  font-weight: 600;
 }
 
 .word b {
@@ -16,18 +23,42 @@
 }
 
 .month {
-  display: flex;
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  align-self: stretch;
   align-items: center;
-  border: 1px solid var(--line);
-  border-radius: 22px;
-  font-size: 14px;
-  font-weight: 600;
+  min-height: 52px;
 }
 
 .month button {
+  display: grid;
+  width: 44px;
+  min-width: 44px;
+  height: 52px;
+  place-items: center;
   color: var(--acc);
+  font-size: 34px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.month-label {
+  display: grid;
+  justify-items: center;
+  gap: 1px;
+  line-height: 1.15;
+}
+
+.month-label span:first-child {
+  color: var(--ink);
   font-size: 20px;
-  min-width: 36px;
+  font-weight: 700;
+}
+
+.month-label span:last-child {
+  color: var(--mute);
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .month button:disabled,
@@ -47,8 +78,8 @@
 }
 
 .theme-toggle {
-  width: 60px;
-  min-width: 60px;
+  width: 54px;
+  min-width: 54px;
   min-height: 44px;
   padding: 0;
   display: grid;
@@ -60,9 +91,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: 60px;
-  height: 32px;
-  padding: 3px;
+  width: 54px;
+  height: 26px;
+  padding: 2px;
   border: 1px solid var(--line);
   border-radius: 18px;
   background: var(--track);
@@ -71,11 +102,11 @@
 .theme-icon {
   position: relative;
   z-index: 1;
-  width: 24px;
-  height: 24px;
+  width: 18px;
+  height: 18px;
   display: grid;
   place-items: center;
-  font-size: 14px;
+  font-size: 11px;
   line-height: 1;
 }
 
@@ -83,15 +114,15 @@
   position: absolute;
   top: 3px;
   left: 3px;
-  width: 24px;
-  height: 24px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   background: var(--acc);
   transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .theme-toggle[aria-checked="true"] .theme-thumb {
-  transform: translateX(28px);
+  transform: translateX(26px);
 }
 
 .theme-error {

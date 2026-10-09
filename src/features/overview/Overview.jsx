@@ -4,7 +4,6 @@ import { formatCurrency, formatCurrencyWithCents } from "../../utils/currency.js
 import { formatCategoryName } from "../../utils/category.js";
 import {
   daysInMonth,
-  formatShortMonthLabel,
   getDaysLeft,
   monthKey,
   shiftMonth,
@@ -283,11 +282,44 @@ function Overview({ onSelectCategory, onOpenSettings }) {
     setTheme(effectiveTheme === "dark" ? "light" : "dark");
   }
 
+  const [selectedYear, selectedMonth] = state.currentMonth.split("-").map(Number);
+  const selectedMonthName = new Date(
+    selectedYear,
+    selectedMonth - 1,
+    1,
+  ).toLocaleDateString("en-US", { month: "long" });
+
   return (
     <>
       <header className="overview-header">
-        <div className="word">
-          <b>Cent</b>sible
+        <div className="overview-header-top">
+          <div className="word">
+            <b>Cent</b>sible
+          </div>
+          <div className="header-actions">
+            <button
+              className="theme-toggle"
+              type="button"
+              role="switch"
+              aria-label="Dark theme"
+              aria-checked={effectiveTheme === "dark"}
+              onClick={toggleTheme}
+            >
+              <span className="theme-track" aria-hidden="true">
+                <span className="theme-icon">☀️</span>
+                <span className="theme-icon">🌙</span>
+                <span className="theme-thumb" />
+              </span>
+            </button>
+            <button
+              className="settings-button"
+              type="button"
+              aria-label="Budget settings"
+              onClick={onOpenSettings}
+            >
+              ⚙︎
+            </button>
+          </div>
         </div>
         <div className="month">
           <button
@@ -295,39 +327,18 @@ function Overview({ onSelectCategory, onOpenSettings }) {
             aria-label="Previous month"
             onClick={() => changeMonth(-1)}
           >
-            ‹
+            <span aria-hidden="true">‹</span>
           </button>
-          {formatShortMonthLabel(state.currentMonth)}
+          <div className="month-label">
+            <span>{selectedMonthName}</span>
+            <span>{selectedYear}</span>
+          </div>
           <button
             type="button"
             aria-label="Next month"
             onClick={() => changeMonth(1)}
           >
-            ›
-          </button>
-        </div>
-        <div className="header-actions">
-          <button
-            className="theme-toggle"
-            type="button"
-            role="switch"
-            aria-label="Dark theme"
-            aria-checked={effectiveTheme === "dark"}
-            onClick={toggleTheme}
-          >
-            <span className="theme-track" aria-hidden="true">
-              <span className="theme-icon">☀️</span>
-              <span className="theme-icon">🌙</span>
-              <span className="theme-thumb" />
-            </span>
-          </button>
-          <button
-            className="settings-button"
-            type="button"
-            aria-label="Budget settings"
-            onClick={onOpenSettings}
-          >
-            ⚙︎
+            <span aria-hidden="true">›</span>
           </button>
         </div>
       </header>
