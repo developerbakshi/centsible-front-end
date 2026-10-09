@@ -44,6 +44,12 @@
 }
 
 .x:disabled,
+.settings-sheet .srow button:disabled {
+  cursor: not-allowed;
+  opacity: 0.25;
+  filter: grayscale(1);
+}
+
 .category-sheet .save:disabled {
   cursor: not-allowed;
   opacity: 0.5;

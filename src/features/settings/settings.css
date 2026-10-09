@@ -43,7 +43,6 @@
   text-transform: capitalize;
 }
 
-.settings-sheet .srow button:disabled,
 .settings-add-category:disabled {
   cursor: not-allowed;
   opacity: 0.5;

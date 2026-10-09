@@ -15,18 +15,6 @@
   white-space: nowrap;
 }
 
-.fab-hint {
-  position: fixed;
-  z-index: 1;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 72px);
-  color: var(--mute);
-  font-size: 12px;
-  text-align: center;
-  white-space: nowrap;
-}
-
 .fab b {
   font-size: 22px;
   font-weight: 400;
@@ -41,6 +29,16 @@
 
 .sheet-spacer {
   width: 60px;
+}
+
+.expense-form {
+  width: 100%;
+  min-width: 0;
+}
+
+.expense-form input {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .amt {
@@ -73,6 +71,10 @@ input.f {
 }
 
 .date-field {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   margin-bottom: 8px;
 }
 
