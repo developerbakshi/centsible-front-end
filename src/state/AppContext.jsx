@@ -81,6 +81,8 @@ export function AppProvider({ children }) {
             cat: expense.categoryId,
             amt: expense.amount,
             date: expense.date,
+            merchant: expense.merchant,
+            bank: expense.bank,
             note: expense.note,
           });
         });

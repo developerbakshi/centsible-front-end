@@ -76,6 +76,12 @@ input.f {
   margin-bottom: 8px;
 }
 
+.expense-field-help {
+  margin: -2px 2px 8px;
+  color: var(--mute);
+  font-size: 12px;
+}
+
 .chips {
   display: flex;
   flex-wrap: wrap;

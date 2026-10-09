@@ -1,4 +1,5 @@
 import { saveAppData } from "../../services/storage/appDataService.js";
+import { updateExpense as updateExpenseApi } from "../../services/expenses/expenseService.js";
 import { daysInMonth } from "../../utils/date.js";
 
 function createId() {
@@ -67,6 +68,7 @@ export async function updateExpense(
 ) {
   const monthData = data.months[monthKey];
   const expenseIndex = monthData?.exp.findIndex(({ id }) => id === expenseId);
+  const originalExpense = expenseIndex >= 0 ? monthData.exp[expenseIndex] : null;
 
   if (
     !monthData ||
@@ -76,13 +78,41 @@ export async function updateExpense(
     throw new Error("Expense details are invalid for the selected month.");
   }
 
+  if (date !== originalExpense.date) {
+    throw new Error("Expense dates cannot be changed through the API yet.");
+  }
+
+  const changes = {};
+  if (Math.round(amount * 100) !== Math.round(originalExpense.amt * 100)) {
+    changes.amount = Math.round(amount * 100) / 100;
+  }
+  if (categoryId !== originalExpense.cat) {
+    const category = monthData.cats.find(({ id }) => id === categoryId);
+    changes.category = category.name.toLocaleUpperCase("en-US");
+  }
+
+  const normalizedNote = note.trim();
+  if (normalizedNote !== (originalExpense.note || "")) {
+    const [merchant = "", ...bankParts] = normalizedNote.split(" · ");
+    const bank = bankParts.join(" · ");
+    const originalMerchant = originalExpense.merchant ?? "";
+    const originalBank = originalExpense.bank ?? "";
+
+    if (merchant !== originalMerchant) changes.merchant = merchant;
+    if (bank !== originalBank) changes.bank = bank;
+  }
+
+  await updateExpenseApi(expenseId, changes);
+
   const expenses = [...monthData.exp];
   expenses[expenseIndex] = {
     ...expenses[expenseIndex],
     cat: categoryId,
     amt: Math.round(amount * 100) / 100,
-    date,
-    note: note.trim(),
+    merchant: changes.merchant ?? originalExpense.merchant ?? "",
+    bank: changes.bank ?? originalExpense.bank ?? "",
+    date: originalExpense.date,
+    note: normalizedNote,
   };
   return saveMonth(data, monthKey, { ...monthData, exp: expenses });
 }

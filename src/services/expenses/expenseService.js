@@ -2,6 +2,28 @@ import { monthKey, padDatePart } from "../../utils/date.js";
 
 const EXPENSES_URL = "https://api-centsible.onrender.com/expenses";
 
+export async function updateExpense(expenseId, changes) {
+  if (Object.keys(changes).length === 0) return;
+
+  let response;
+  try {
+    response = await fetch(
+      `${EXPENSES_URL}/${encodeURIComponent(expenseId)}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(changes),
+      },
+    );
+  } catch {
+    throw new Error("Could not connect to the expenses API.");
+  }
+
+  if (!response.ok) {
+    throw new Error(`The expense update failed (${response.status}).`);
+  }
+}
+
 function normalizeExpense(expense) {
   if (
     expense === null ||
@@ -30,6 +52,8 @@ function normalizeExpense(expense) {
     categoryId: String(expense.category_id),
     amount: Math.round(expense.amount * 100) / 100,
     date,
+    merchant: typeof expense.merchant === "string" ? expense.merchant : "",
+    bank: typeof expense.bank === "string" ? expense.bank : "",
     note,
   };
 }

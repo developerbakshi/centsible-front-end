@@ -101,8 +101,10 @@ function ExpenseSheet({
         await addExpense(values);
       }
       onClose();
-    } catch {
-      setError("Could not save this expense. Please try again.");
+    } catch (submitError) {
+      setError(
+        submitError.message || "Could not save this expense. Please try again.",
+      );
     } finally {
       setSaving(false);
     }
@@ -163,7 +165,13 @@ function ExpenseSheet({
         max={maxDate}
         onChange={(event) => setDate(event.target.value)}
         aria-label="Expense date"
+        disabled={Boolean(expense)}
       />
+      {expense && (
+        <div className="expense-field-help">
+          Date edits aren’t supported yet.
+        </div>
+      )}
       <input
         className="f"
         placeholder="Note (optional)"

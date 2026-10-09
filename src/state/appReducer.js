@@ -70,7 +70,7 @@ export function appReducer(state, action) {
       return {
         ...state,
         storageStatus: "save-error",
-        storageError: "Could not save expenses to this device.",
+        storageError: "Could not save expense changes.",
       };
     case "month/change": {
       const months = ensureMonth(state.data.months, action.month);
