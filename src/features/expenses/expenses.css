@@ -107,15 +107,17 @@ input.f {
 
 .date-field {
   display: block;
-  inline-size: 100%;
+  width: 100%;
   min-width: 0;
   max-width: 100%;
-  text-align: left;
+  -webkit-appearance: none;
+  appearance: none;
+  text-align: center;
   margin-bottom: 8px;
 }
 
 .date-field::-webkit-date-and-time-value {
-  text-align: left;
+  text-align: center;
 }
 
 .expense-field-help {
