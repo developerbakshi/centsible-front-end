@@ -249,6 +249,7 @@ input.f {
 .chips {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 8px;
   margin: 10px 0 14px;
 }
