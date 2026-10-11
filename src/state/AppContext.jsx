@@ -80,6 +80,8 @@ export function AppProvider({ children }) {
     isRefreshing: false,
     error: null,
   });
+  const [isOperationLoading, setIsOperationLoading] = useState(false);
+  const operationCountRef = useRef(0);
   const settingsDataRef = useRef(state.data);
   const settingsQueueRef = useRef(Promise.resolve());
   const refreshPromiseRef = useRef(null);
@@ -137,6 +139,17 @@ export function AppProvider({ children }) {
     })();
     refreshPromiseRef.current = pending;
     return pending;
+  }, []);
+
+  const runWithLoader = useCallback(async (operation) => {
+    operationCountRef.current += 1;
+    setIsOperationLoading(true);
+    try {
+      return await operation();
+    } finally {
+      operationCountRef.current -= 1;
+      if (operationCountRef.current === 0) setIsOperationLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -268,6 +281,8 @@ export function AppProvider({ children }) {
       isRefreshing: refreshStatus.isRefreshing,
       refreshError: refreshStatus.error,
       refreshData,
+      isOperationLoading,
+      runWithLoader,
       setTheme,
       addExpense,
       updateExpense,
@@ -280,6 +295,8 @@ export function AppProvider({ children }) {
       systemTheme,
       refreshStatus,
       refreshData,
+      isOperationLoading,
+      runWithLoader,
       setTheme,
       addExpense,
       updateExpense,

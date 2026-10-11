@@ -61,3 +61,31 @@ button {
   text-align: center;
   pointer-events: none;
 }
+
+.loading-overlay {
+  position: fixed;
+  z-index: 10;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(67, 75, 72, 0.48);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  touch-action: none;
+}
+
+.loading-overlay img {
+  width: min(120px, 32vw);
+  height: auto;
+}
+
+#app[data-theme="dark"] .loading-overlay {
+  background: rgba(10, 16, 15, 0.72);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) #app:not([data-theme="light"])
+    .loading-overlay {
+    background: rgba(10, 16, 15, 0.72);
+  }
+}

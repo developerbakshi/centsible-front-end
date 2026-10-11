@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import LoadingOverlay from "./components/ui/LoadingOverlay.jsx";
 import BottomSheet from "./components/ui/BottomSheet.jsx";
 import CategorySheet from "./features/categories/CategorySheet.jsx";
 import AllExpensesSheet from "./features/expenses/AllExpensesSheet.jsx";
@@ -8,7 +9,13 @@ import SettingsSheet from "./features/settings/SettingsSheet.jsx";
 import { useAppState } from "./state/AppContext.jsx";
 
 function App() {
-  const { state, isRefreshing, refreshData, refreshError } = useAppState();
+  const {
+    state,
+    isRefreshing,
+    refreshData,
+    refreshError,
+    isOperationLoading,
+  } = useAppState();
   const [activeSheet, setActiveSheet] = useState(null);
   const [pullDistance, setPullDistance] = useState(0);
   const pullStartRef = useRef(null);
@@ -18,6 +25,8 @@ function App() {
     (total, month) => total + month.exp.length,
     0,
   );
+  const isLoading = state.storageStatus === "loading";
+  const isBlocking = isLoading || isRefreshing || isOperationLoading;
 
   useEffect(() => {
     const refreshOnForeground = () => {
@@ -48,6 +57,7 @@ function App() {
 
   function handleTouchStart(event) {
     if (
+      isBlocking ||
       activeSheet ||
       event.touches.length !== 1 ||
       appRef.current?.scrollTop > 0 ||
@@ -81,6 +91,7 @@ function App() {
     setPullDistance(0);
 
     if (
+      !isBlocking &&
       start &&
       touch &&
       touch.clientY - start.y >= 60 &&
@@ -100,112 +111,110 @@ function App() {
       onTouchEnd={handleTouchEnd}
       onTouchCancel={handleTouchEnd}
     >
-      {(pullDistance > 12 || isRefreshing || refreshError) && (
-        <div className="refresh-indicator" role="status" aria-live="polite">
-          {refreshError
-            ? `Refresh failed: ${refreshError}`
-            : isRefreshing
-              ? "Refreshing latest data…"
+      <div className="app-content" inert={isBlocking}>
+        {(pullDistance > 12 || refreshError) && !isBlocking && (
+          <div className="refresh-indicator" role="status" aria-live="polite">
+            {refreshError
+              ? `Refresh failed: ${refreshError}`
               : pullDistance >= 60
                 ? "Release to refresh"
                 : "Pull down to refresh"}
-        </div>
-      )}
-      {state.storageStatus === "loading" ? (
-        <div className="app-state" role="status">
-          Loading categories…
-        </div>
-      ) : state.storageStatus === "load-error" ? (
-        <div className="app-state bad" role="alert">
-          {state.storageError} Refresh the page to try again.
-        </div>
-      ) : (
-        <>
-          <Overview
-            onOpenSettings={() => setActiveSheet({ type: "settings" })}
-            onSelectCategory={(categoryId) =>
-              setActiveSheet({ type: "category", categoryId })
-            }
-          />
-          <div className="expense-dock" aria-label="Expense actions">
-            <button
-              className="expense-dock-add"
-              type="button"
-              disabled
-              aria-label="Add expense (disabled)"
-              title="Adding expenses is disabled"
-            >
-              <b>+</b>Add
-            </button>
-            <span className="expense-dock-divider" aria-hidden="true" />
-            <button
-              className="expense-dock-list"
-              type="button"
-              aria-label={`View all ${expenseCount} expenses`}
-              onClick={() => setActiveSheet({ type: "allExpenses" })}
-            >
-              <span aria-hidden="true">☷</span>
-              {expenseCount}
-            </button>
           </div>
-          <BottomSheet
-            open={Boolean(activeSheet)}
-            onClose={() => setActiveSheet(null)}
-            className={
-              activeSheet?.type === "allExpenses" ||
-              activeSheet?.expenseFromAllExpenses
-                ? "sheet-all-expenses"
-                : ""
-            }
-          >
-            {activeSheet?.type === "allExpenses" && (
-              <AllExpensesSheet
-                onClose={() => setActiveSheet(null)}
-                onEdit={(expenseId, expenseMonthKey) =>
-                  setActiveSheet({
-                    type: "expense",
-                    expenseId,
-                    expenseMonthKey,
-                    expenseFromAllExpenses: true,
-                  })
-                }
-              />
-            )}
-            {activeSheet?.type === "category" && (
-              <CategorySheet
-                categoryId={activeSheet.categoryId}
-                onClose={() => setActiveSheet(null)}
-                onAdd={(categoryId) =>
-                  setActiveSheet({
-                    type: "expense",
-                    preselectedCategoryId: categoryId,
-                  })
-                }
-                onEdit={(expenseId) =>
-                  setActiveSheet({ type: "expense", expenseId })
-                }
-              />
-            )}
-            {activeSheet?.type === "expense" && (
-              <ExpenseSheet
-                expenseId={activeSheet.expenseId}
-                expenseMonthKey={activeSheet.expenseMonthKey}
-                preselectedCategoryId={activeSheet.preselectedCategoryId}
-                onClose={() =>
-                  setActiveSheet(
-                    activeSheet.expenseFromAllExpenses
-                      ? { type: "allExpenses" }
-                      : null,
-                  )
-                }
-              />
-            )}
-            {activeSheet?.type === "settings" && (
-              <SettingsSheet onClose={() => setActiveSheet(null)} />
-            )}
-          </BottomSheet>
-        </>
-      )}
+        )}
+        {state.storageStatus === "load-error" ? (
+          <div className="app-state bad" role="alert">
+            {state.storageError} Refresh the page to try again.
+          </div>
+        ) : state.storageStatus === "ready" ||
+          state.storageStatus === "save-error" ? (
+          <>
+            <Overview
+              onOpenSettings={() => setActiveSheet({ type: "settings" })}
+              onSelectCategory={(categoryId) =>
+                setActiveSheet({ type: "category", categoryId })
+              }
+            />
+            <div className="expense-dock" aria-label="Expense actions">
+              <button
+                className="expense-dock-add"
+                type="button"
+                disabled
+                aria-label="Add expense (disabled)"
+                title="Adding expenses is disabled"
+              >
+                <b>+</b>Add
+              </button>
+              <span className="expense-dock-divider" aria-hidden="true" />
+              <button
+                className="expense-dock-list"
+                type="button"
+                aria-label={`View all ${expenseCount} expenses`}
+                onClick={() => setActiveSheet({ type: "allExpenses" })}
+              >
+                <span aria-hidden="true">☷</span>
+                {expenseCount}
+              </button>
+            </div>
+            <BottomSheet
+              open={Boolean(activeSheet)}
+              onClose={() => setActiveSheet(null)}
+              className={
+                activeSheet?.type === "allExpenses" ||
+                activeSheet?.expenseFromAllExpenses
+                  ? "sheet-all-expenses"
+                  : ""
+              }
+            >
+              {activeSheet?.type === "allExpenses" && (
+                <AllExpensesSheet
+                  onClose={() => setActiveSheet(null)}
+                  onEdit={(expenseId, expenseMonthKey) =>
+                    setActiveSheet({
+                      type: "expense",
+                      expenseId,
+                      expenseMonthKey,
+                      expenseFromAllExpenses: true,
+                    })
+                  }
+                />
+              )}
+              {activeSheet?.type === "category" && (
+                <CategorySheet
+                  categoryId={activeSheet.categoryId}
+                  onClose={() => setActiveSheet(null)}
+                  onAdd={(categoryId) =>
+                    setActiveSheet({
+                      type: "expense",
+                      preselectedCategoryId: categoryId,
+                    })
+                  }
+                  onEdit={(expenseId) =>
+                    setActiveSheet({ type: "expense", expenseId })
+                  }
+                />
+              )}
+              {activeSheet?.type === "expense" && (
+                <ExpenseSheet
+                  expenseId={activeSheet.expenseId}
+                  expenseMonthKey={activeSheet.expenseMonthKey}
+                  preselectedCategoryId={activeSheet.preselectedCategoryId}
+                  onClose={() =>
+                    setActiveSheet(
+                      activeSheet.expenseFromAllExpenses
+                        ? { type: "allExpenses" }
+                        : null,
+                    )
+                  }
+                />
+              )}
+              {activeSheet?.type === "settings" && (
+                <SettingsSheet onClose={() => setActiveSheet(null)} />
+              )}
+            </BottomSheet>
+          </>
+        ) : null}
+      </div>
+      {isBlocking && <LoadingOverlay />}
     </div>
   );
 }

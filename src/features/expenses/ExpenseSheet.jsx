@@ -23,7 +23,7 @@ function ExpenseSheet({
   expenseId = null,
   expenseMonthKey = null,
 }) {
-  const { state, addExpense, updateExpense } = useAppState();
+  const { state, addExpense, updateExpense, runWithLoader } = useAppState();
   const selectedMonthKey = expenseMonthKey || state.currentMonth;
   const month = state.data.months[selectedMonthKey];
   const expense = expenseId
@@ -93,15 +93,17 @@ function ExpenseSheet({
         date,
         note,
       };
-      if (expenseId) {
-        await updateExpense({
-          ...values,
-          monthKey: selectedMonthKey,
-          expenseId,
-        });
-      } else {
-        await addExpense(values);
-      }
+      await runWithLoader(async () => {
+        if (expenseId) {
+          await updateExpense({
+            ...values,
+            monthKey: selectedMonthKey,
+            expenseId,
+          });
+        } else {
+          await addExpense(values);
+        }
+      });
       onClose();
     } catch (submitError) {
       setError(
@@ -185,11 +187,7 @@ function ExpenseSheet({
         {error || state.storageError || ""}
       </div>
       <button className="save" type="submit" disabled={saving}>
-        {saving
-          ? "Saving…"
-          : expense
-            ? "Save changes"
-            : "Save expense"}
+        {expense ? "Save changes" : "Save expense"}
       </button>
     </form>
   );
