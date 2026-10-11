@@ -106,7 +106,7 @@ function calculateOverview(monthKeyValue, month, today = new Date()) {
   };
 }
 
-function ProgressBar({ ratio, tone, tick, marker }) {
+function ProgressBar({ ratio, tone, tick, tickLabel, marker }) {
   const [animated, setAnimated] = useState(false);
   const width = `${Math.max(0, Math.min(ratio, 1)) * 100}%`;
 
@@ -125,6 +125,17 @@ function ProgressBar({ ratio, tone, tick, marker }) {
       />
       {tick !== null && (
         <span className="tick" style={{ left: `${tick * 100}%` }} />
+      )}
+      {tick !== null && tickLabel && (
+        <span
+          className="tick-label"
+          style={{
+            left: `clamp(26px, ${tick * 100}%, calc(100% - 26px))`,
+          }}
+          aria-label={`Even-spend target: ${tickLabel}`}
+        >
+          {tickLabel}
+        </span>
       )}
       {marker && (
         <span
@@ -228,6 +239,8 @@ function MonthlyHero({ month, overview, animationKey }) {
 function CategoryRow({ category, spent, pace, animationKey, onSelect }) {
   const ratio = spent / (category.limit || 1);
   const left = category.limit - spent;
+  const evenSpend =
+    pace === null ? null : Math.round(category.limit * pace * 100) / 100;
   const tone = getTone(ratio);
 
   return (
@@ -245,6 +258,11 @@ function CategoryRow({ category, spent, pace, animationKey, onSelect }) {
         ratio={ratio}
         tone={tone}
         tick={pace}
+        tickLabel={
+          evenSpend === null
+            ? null
+            : formatCurrency(evenSpend).replace("$", "")
+        }
         marker={category.emoji}
       />
       <div className="sl">
