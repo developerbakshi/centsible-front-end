@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import BottomSheet from "./components/ui/BottomSheet.jsx";
 import CategorySheet from "./features/categories/CategorySheet.jsx";
 import AllExpensesSheet from "./features/expenses/AllExpensesSheet.jsx";
@@ -8,15 +8,109 @@ import SettingsSheet from "./features/settings/SettingsSheet.jsx";
 import { useAppState } from "./state/AppContext.jsx";
 
 function App() {
-  const { state } = useAppState();
+  const { state, isRefreshing, refreshData, refreshError } = useAppState();
   const [activeSheet, setActiveSheet] = useState(null);
+  const [pullDistance, setPullDistance] = useState(0);
+  const pullStartRef = useRef(null);
+  const lastAutomaticRefreshRef = useRef(0);
+  const appRef = useRef(null);
   const expenseCount = Object.values(state.data.months).reduce(
     (total, month) => total + month.exp.length,
     0,
   );
 
+  useEffect(() => {
+    const refreshOnForeground = () => {
+      if (
+        document.visibilityState !== "visible" ||
+        state.storageStatus === "loading" ||
+        Date.now() - lastAutomaticRefreshRef.current < 15_000
+      ) {
+        return;
+      }
+
+      lastAutomaticRefreshRef.current = Date.now();
+      refreshData().catch(() => {});
+    };
+    const refreshFromPageShow = (event) => {
+      if (event.persisted) refreshOnForeground();
+    };
+
+    document.addEventListener("visibilitychange", refreshOnForeground);
+    window.addEventListener("focus", refreshOnForeground);
+    window.addEventListener("pageshow", refreshFromPageShow);
+    return () => {
+      document.removeEventListener("visibilitychange", refreshOnForeground);
+      window.removeEventListener("focus", refreshOnForeground);
+      window.removeEventListener("pageshow", refreshFromPageShow);
+    };
+  }, [refreshData, state.storageStatus]);
+
+  function handleTouchStart(event) {
+    if (
+      activeSheet ||
+      event.touches.length !== 1 ||
+      appRef.current?.scrollTop > 0 ||
+      event.target.closest?.("input, textarea, select, button, .sheet")
+    ) {
+      pullStartRef.current = null;
+      return;
+    }
+
+    pullStartRef.current = {
+      x: event.touches[0].clientX,
+      y: event.touches[0].clientY,
+    };
+  }
+
+  function handleTouchMove(event) {
+    const start = pullStartRef.current;
+    if (!start || event.touches.length !== 1) return;
+
+    const deltaY = event.touches[0].clientY - start.y;
+    const deltaX = Math.abs(event.touches[0].clientX - start.x);
+    if (deltaY > deltaX) {
+      setPullDistance(Math.min(deltaY, 72));
+    }
+  }
+
+  function handleTouchEnd(event) {
+    const start = pullStartRef.current;
+    const touch = event.changedTouches[0];
+    pullStartRef.current = null;
+    setPullDistance(0);
+
+    if (
+      start &&
+      touch &&
+      touch.clientY - start.y >= 60 &&
+      !isRefreshing
+    ) {
+      refreshData().catch(() => {});
+    }
+  }
+
   return (
-    <div id="app" data-theme={state.data.theme || undefined}>
+    <div
+      id="app"
+      ref={appRef}
+      data-theme={state.data.theme || undefined}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchEnd}
+    >
+      {(pullDistance > 12 || isRefreshing || refreshError) && (
+        <div className="refresh-indicator" role="status" aria-live="polite">
+          {refreshError
+            ? `Refresh failed: ${refreshError}`
+            : isRefreshing
+              ? "Refreshing latest data…"
+              : pullDistance >= 60
+                ? "Release to refresh"
+                : "Pull down to refresh"}
+        </div>
+      )}
       {state.storageStatus === "loading" ? (
         <div className="app-state" role="status">
           Loading categories…

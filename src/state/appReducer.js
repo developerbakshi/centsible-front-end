@@ -41,6 +41,15 @@ export function appReducer(state, action) {
         storageError: null,
       };
     }
+    case "data/refresh": {
+      const months = ensureMonth(action.data.months, state.currentMonth);
+      return {
+        ...state,
+        data: { ...action.data, theme: state.data.theme, months },
+        storageStatus: "ready",
+        storageError: null,
+      };
+    }
     case "data/replace":
       return {
         ...state,

@@ -94,6 +94,10 @@
   opacity: 1;
 }
 
+.expense-form input[aria-label="Note (optional)"] {
+  text-align: center;
+}
+
 input.f {
   width: 100%;
   min-height: 44px;

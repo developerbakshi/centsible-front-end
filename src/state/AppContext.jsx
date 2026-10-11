@@ -36,11 +36,53 @@ function getSystemTheme() {
     : "light";
 }
 
+async function fetchLatestData() {
+  const [categories, expenses] = await Promise.all([
+    getCategories(),
+    getExpenses(),
+  ]);
+  const key = monthKey(new Date());
+  const budget = categories.reduce(
+    (total, category) => total + category.limit,
+    0,
+  );
+  const months = {
+    [key]: { budget, cats: categories, exp: [] },
+  };
+  expenses.forEach((expense) => {
+    if (!categories.some(({ id }) => id === expense.categoryId)) {
+      throw new Error(`Expense ${expense.id} references an unknown category.`);
+    }
+
+    const expenseMonth = expense.date.slice(0, 7);
+    if (!months[expenseMonth]) {
+      months[expenseMonth] = { budget, cats: categories, exp: [] };
+    }
+    months[expenseMonth].exp.push({
+      id: expense.id,
+      cat: expense.categoryId,
+      amt: expense.amount,
+      date: expense.date,
+      time: expense.time,
+      createdAt: expense.createdAt,
+      merchant: expense.merchant,
+      bank: expense.bank,
+      note: expense.note,
+    });
+  });
+  return { theme: "", months };
+}
+
 export function AppProvider({ children }) {
   const [state, dispatch] = useReducer(appReducer, undefined, createInitialState);
   const [systemTheme, setSystemTheme] = useState(getSystemTheme);
+  const [refreshStatus, setRefreshStatus] = useState({
+    isRefreshing: false,
+    error: null,
+  });
   const settingsDataRef = useRef(state.data);
   const settingsQueueRef = useRef(Promise.resolve());
+  const refreshPromiseRef = useRef(null);
 
   useEffect(() => {
     settingsDataRef.current = state.data;
@@ -51,47 +93,9 @@ export function AppProvider({ children }) {
 
     async function initializeData() {
       try {
-        const [categories, expenses] = await Promise.all([
-          getCategories(),
-          getExpenses(),
-        ]);
+        const data = await fetchLatestData();
         if (!active) return;
 
-        const key = monthKey(new Date());
-        const budget = categories.reduce(
-          (total, category) => total + category.limit,
-          0,
-        );
-        const months = {
-          [key]: { budget, cats: categories, exp: [] },
-        };
-        expenses.forEach((expense) => {
-          if (!categories.some(({ id }) => id === expense.categoryId)) {
-            throw new Error(
-              `Expense ${expense.id} references an unknown category.`,
-            );
-          }
-
-          const expenseMonth = expense.date.slice(0, 7);
-          if (!months[expenseMonth]) {
-            months[expenseMonth] = { budget, cats: categories, exp: [] };
-          }
-          months[expenseMonth].exp.push({
-            id: expense.id,
-            cat: expense.categoryId,
-            amt: expense.amount,
-            date: expense.date,
-            time: expense.time,
-            createdAt: expense.createdAt,
-            merchant: expense.merchant,
-            bank: expense.bank,
-            note: expense.note,
-          });
-        });
-        const data = {
-          theme: "",
-          months,
-        };
         await saveAppData(data);
         if (active) dispatch({ type: "data/load", data });
       } catch (error) {
@@ -109,6 +113,30 @@ export function AppProvider({ children }) {
     return () => {
       active = false;
     };
+  }, []);
+
+  const refreshData = useCallback(() => {
+    if (refreshPromiseRef.current) return refreshPromiseRef.current;
+
+    setRefreshStatus({ isRefreshing: true, error: null });
+    const pending = (async () => {
+      try {
+        const data = await fetchLatestData();
+        await saveAppData(data);
+        dispatch({ type: "data/refresh", data });
+        setRefreshStatus({ isRefreshing: false, error: null });
+      } catch (error) {
+        setRefreshStatus({
+          isRefreshing: false,
+          error: error.message || "Could not refresh the latest data.",
+        });
+        throw error;
+      } finally {
+        refreshPromiseRef.current = null;
+      }
+    })();
+    refreshPromiseRef.current = pending;
+    return pending;
   }, []);
 
   useEffect(() => {
@@ -237,6 +265,9 @@ export function AppProvider({ children }) {
       state,
       dispatch,
       effectiveTheme: state.data.theme || systemTheme,
+      isRefreshing: refreshStatus.isRefreshing,
+      refreshError: refreshStatus.error,
+      refreshData,
       setTheme,
       addExpense,
       updateExpense,
@@ -247,6 +278,8 @@ export function AppProvider({ children }) {
     [
       state,
       systemTheme,
+      refreshStatus,
+      refreshData,
       setTheme,
       addExpense,
       updateExpense,
