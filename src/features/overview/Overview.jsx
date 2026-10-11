@@ -321,6 +321,8 @@ function Overview({ onSelectCategory, onOpenSettings }) {
             </button>
           </div>
         </div>
+      </header>
+      <div className="month-sticky">
         <div className="month">
           <button
             type="button"
@@ -341,7 +343,7 @@ function Overview({ onSelectCategory, onOpenSettings }) {
             <span aria-hidden="true">›</span>
           </button>
         </div>
-      </header>
+      </div>
       {state.storageError && (
         <div className="theme-error" role="alert">
           {state.storageError}
