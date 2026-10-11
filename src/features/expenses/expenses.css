@@ -1,0 +1,281 @@
+.expense-dock {
+  position: fixed;
+  z-index: 1;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
+  display: flex;
+  align-items: center;
+  height: 54px;
+  padding: 3px 8px;
+  border-radius: 27px;
+  background: var(--ink);
+  color: var(--bg);
+  font-weight: 700;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  white-space: nowrap;
+}
+
+.expense-dock button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 48px;
+  min-width: 0;
+  padding: 0 18px;
+  color: inherit;
+  background: transparent;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.expense-dock .expense-dock-add {
+  padding: 0 18px 0 22px;
+}
+
+.expense-dock-add:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
+.expense-dock-add b {
+  font-size: 22px;
+  font-weight: 400;
+}
+
+.expense-dock-divider {
+  width: 1px;
+  height: 22px;
+  background: var(--bg);
+  opacity: 0.35;
+}
+
+.expense-dock .expense-dock-list {
+  padding: 0 22px 0 18px;
+}
+
+.expense-dock-list span {
+  font-size: 20px;
+}
+
+.sheet-spacer {
+  width: 60px;
+}
+
+.expense-form {
+  width: 100%;
+  min-width: 0;
+}
+
+.expense-form input.f {
+  display: block;
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.amt {
+  width: 100%;
+  font-size: 64px;
+  font-weight: 200;
+  letter-spacing: -2px;
+  text-align: center;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  outline: none;
+  padding: 8px 0;
+}
+
+.expense-form input::placeholder {
+  color: var(--mute);
+  opacity: 1;
+}
+
+.expense-form input[aria-label="Note (optional)"] {
+  text-align: center;
+}
+
+input.f {
+  width: 100%;
+  min-height: 44px;
+  font: inherit;
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+}
+
+.date-field {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.date-field::-webkit-date-and-time-value {
+  text-align: center;
+}
+
+.expense-field-help {
+  margin: -2px 2px 8px;
+  color: var(--mute);
+  font-size: 12px;
+}
+
+.sheet.sheet-all-expenses {
+  display: flex;
+  flex-direction: column;
+  height: 92dvh;
+  max-height: 92dvh;
+  overflow: hidden;
+}
+
+.all-expenses-sheet {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.all-expenses-list {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.all-expense-row {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  padding: 14px 0;
+  color: var(--ink);
+  text-align: left;
+  border-top: 1px solid var(--line);
+}
+
+.all-expense-main,
+.all-expense-meta {
+  display: flex;
+  width: 100%;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.all-expense-main {
+  justify-content: space-between;
+}
+
+.all-expense-meta {
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.all-expense-row:active {
+  opacity: 0.7;
+}
+
+.all-expense-merchant {
+  overflow: hidden;
+  font-size: 16px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.all-expense-main b {
+  flex: 0 0 auto;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.all-expense-meta {
+  margin-top: 4px;
+  color: var(--mute);
+  font-size: 12px;
+}
+
+.all-expense-bank,
+.all-expense-date,
+.all-expense-time,
+.all-expense-separator {
+  color: var(--mute);
+  font-size: 12px;
+}
+
+.all-expense-category {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+.all-expense-category-icon {
+  font-size: 13px;
+}
+
+.all-expense-category-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.all-expense-bank {
+  flex: 0 0 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.all-expense-separator {
+  flex: 0 0 auto;
+  margin: 0 -4px;
+}
+
+.all-expense-date {
+  flex: 0 0 auto;
+  text-align: right;
+}
+
+.all-expense-time {
+  flex: 0 0 auto;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 10px 0 14px;
+}
+
+.chip {
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  padding: 0 14px 0 10px;
+  min-height: 44px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chip i {
+  font-style: normal;
+  font-size: 18px;
+}
+
+.chip.sel {
+  background: var(--ink);
+  color: var(--bg);
+  border-color: var(--ink);
+}

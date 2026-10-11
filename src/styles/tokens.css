@@ -1,0 +1,29 @@
+:root {
+  --bg: #f3f6f2;
+  --ink: #0d1f1b;
+  --mute: #66756f;
+  --line: #dbe3de;
+  --acc: #0a6b5c;
+  --ok: #178a4c;
+  --warn: #c2670a;
+  --bad: #d13b3b;
+  --track: #e1e8e3;
+  --card: #fff;
+  color-scheme: light dark;
+  box-sizing: border-box;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0a100f;
+    --ink: #eaf2ef;
+    --mute: #8aa098;
+    --line: #1f2d2a;
+    --acc: #34d3b6;
+    --ok: #4ade80;
+    --warn: #fbbf24;
+    --bad: #f87171;
+    --track: #1c2a27;
+    --card: #13201d;
+  }
+}
