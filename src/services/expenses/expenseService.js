@@ -31,7 +31,6 @@ function normalizeExpense(expense) {
     !Number.isInteger(expense.id) ||
     !Number.isInteger(expense.category_id) ||
     !Number.isFinite(expense.amount) ||
-    expense.amount < 0 ||
     typeof expense.expense_date !== "string" ||
     typeof expense.created_at !== "string"
   ) {
