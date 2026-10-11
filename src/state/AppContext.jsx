@@ -18,23 +18,12 @@ import {
   updateExpense as updateExpenseService,
 } from "../features/expenses/expenseService.js";
 import {
-  clearThemePreference,
-  loadThemePreference,
-  saveThemePreference,
-} from "../services/storage/preferencesService.js";
-import {
   resetSampleData as resetSampleDataService,
   updateMonthSettings as updateMonthSettingsService,
 } from "../features/settings/settingsService.js";
 import { monthKey } from "../utils/date.js";
 
 const AppContext = createContext(null);
-
-function getSystemTheme() {
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
-}
 
 async function fetchLatestData() {
   const [categories, expenses] = await Promise.all([
@@ -75,7 +64,6 @@ async function fetchLatestData() {
 
 export function AppProvider({ children }) {
   const [state, dispatch] = useReducer(appReducer, undefined, createInitialState);
-  const [systemTheme, setSystemTheme] = useState(getSystemTheme);
   const [refreshStatus, setRefreshStatus] = useState({
     isRefreshing: false,
     error: null,
@@ -152,52 +140,6 @@ export function AppProvider({ children }) {
     }
   }, []);
 
-  useEffect(() => {
-    let active = true;
-
-    loadThemePreference()
-      .then((theme) => {
-        if (active) dispatch({ type: "theme/load", theme });
-      })
-      .catch(() => {
-        if (active) {
-          dispatch({
-            type: "theme/error",
-            message: "Could not load the saved theme preference.",
-          });
-        }
-      });
-
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const updateSystemTheme = (event) =>
-      setSystemTheme(event.matches ? "dark" : "light");
-
-    setSystemTheme(media.matches ? "dark" : "light");
-    media.addEventListener("change", updateSystemTheme);
-
-    return () => media.removeEventListener("change", updateSystemTheme);
-  }, []);
-
-  const setTheme = useCallback(
-    async (theme) => {
-      dispatch({ type: "theme/change", theme });
-      try {
-        await saveThemePreference(theme);
-      } catch {
-        dispatch({
-          type: "theme/error",
-          message: "Could not save the theme preference.",
-        });
-      }
-    },
-    [dispatch],
-  );
   const runExpenseOperation = useCallback(
     async (operation, payload) => {
       if (state.storageStatus === "load-error") {
@@ -262,28 +204,17 @@ export function AppProvider({ children }) {
     [runSettingsOperation, state.currentMonth],
   );
   const resetSampleData = useCallback(async () => {
-    const data = await runSettingsOperation(resetSampleDataService, null, true);
-    try {
-      await clearThemePreference();
-    } catch {
-      dispatch({
-        type: "theme/error",
-        message: "Sample data was reset, but the theme preference could not be reset.",
-      });
-    }
-    return data;
-  }, [dispatch, runSettingsOperation]);
+    return runSettingsOperation(resetSampleDataService, null, true);
+  }, [runSettingsOperation]);
   const value = useMemo(
     () => ({
       state,
       dispatch,
-      effectiveTheme: state.data.theme || systemTheme,
       isRefreshing: refreshStatus.isRefreshing,
       refreshError: refreshStatus.error,
       refreshData,
       isOperationLoading,
       runWithLoader,
-      setTheme,
       addExpense,
       updateExpense,
       deleteExpense,
@@ -292,12 +223,10 @@ export function AppProvider({ children }) {
     }),
     [
       state,
-      systemTheme,
       refreshStatus,
       refreshData,
       isOperationLoading,
       runWithLoader,
-      setTheme,
       addExpense,
       updateExpense,
       deleteExpense,

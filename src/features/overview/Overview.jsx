@@ -282,7 +282,7 @@ function CategoryRow({ category, spent, pace, animationKey, onSelect }) {
 }
 
 function Overview({ onSelectCategory, onOpenSettings }) {
-  const { state, dispatch, effectiveTheme, setTheme } = useAppState();
+  const { state, dispatch } = useAppState();
   const month = state.data.months[state.currentMonth];
   const overview = useMemo(
     () => calculateOverview(state.currentMonth, month),
@@ -294,10 +294,6 @@ function Overview({ onSelectCategory, onOpenSettings }) {
       type: "month/change",
       month: shiftMonth(state.currentMonth, amount),
     });
-  }
-
-  function toggleTheme() {
-    setTheme(effectiveTheme === "dark" ? "light" : "dark");
   }
 
   const [selectedYear, selectedMonth] = state.currentMonth.split("-").map(Number);
@@ -315,20 +311,6 @@ function Overview({ onSelectCategory, onOpenSettings }) {
             <b>Cent</b>sible
           </div>
           <div className="header-actions">
-            <button
-              className="theme-toggle"
-              type="button"
-              role="switch"
-              aria-label="Dark theme"
-              aria-checked={effectiveTheme === "dark"}
-              onClick={toggleTheme}
-            >
-              <span className="theme-track" aria-hidden="true">
-                <span className="theme-icon">☀️</span>
-                <span className="theme-icon">🌙</span>
-                <span className="theme-thumb" />
-              </span>
-            </button>
             <button
               className="settings-button"
               type="button"
@@ -360,11 +342,6 @@ function Overview({ onSelectCategory, onOpenSettings }) {
           </button>
         </div>
       </header>
-      {state.themeError && (
-        <div className="theme-error" role="alert">
-          {state.themeError}
-        </div>
-      )}
       {state.storageError && (
         <div className="theme-error" role="alert">
           {state.storageError}

@@ -105,7 +105,6 @@ function App() {
     <div
       id="app"
       ref={appRef}
-      data-theme={state.data.theme || undefined}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}

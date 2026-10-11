@@ -79,13 +79,8 @@ button {
   height: auto;
 }
 
-#app[data-theme="dark"] .loading-overlay {
-  background: rgba(10, 16, 15, 0.72);
-}
-
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) #app:not([data-theme="light"])
-    .loading-overlay {
+  #app .loading-overlay {
     background: rgba(10, 16, 15, 0.72);
   }
 }
