@@ -138,7 +138,7 @@ function ExpenseSheet({
       <input
         ref={amountRef}
         className="amt"
-        inputMode="text"
+        inputMode="decimal"
         placeholder="$0.00"
         value={amount}
         onChange={handleAmountChange}
