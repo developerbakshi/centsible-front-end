@@ -46,6 +46,9 @@ iPhone experience, not a desktop-responsive product.
   through the interface.
 - **All expenses** opens a tall scrolling sheet with all loaded expenses, sorted
   newest first by API `created_at`.
+- A third dock segment opens the Weekly view. Its sheet shows a month-clipped
+  calendar week, its remaining allowance, daily spending rail, and category
+  shares; arrows navigate weeks within the selected month.
 - An all-expenses row shows merchant, amount, category emoji and name, bank,
   expense date, and—when the API date contains a time—the local time.
 - Selecting an expense opens the existing edit sheet. Cancel returns to the
@@ -102,6 +105,10 @@ The palette is defined in [`src/styles/tokens.css`](./src/styles/tokens.css):
 | `--bad` | `#d13b3b` | `#f87171` | Over-budget/error status |
 | `--track` | `#e1e8e3` | `#1c2a27` | Progress track |
 | `--card` | `#fff` | `#13201d` | Card surface |
+| `--line-strong` | `#cdd7d2` | `#2a3b37` | Weekly rail zero-day stub |
+| `--ok-on-ink` | `#4ade80` | `#178a4c` | Green status on the dock |
+| `--warn-on-ink` | `#fbbf24` | `#c2670a` | Amber status on the dock |
+| `--bad-on-ink` | `#f87171` | `#d13b3b` | Red status on the dock |
 
 Other design conventions:
 
@@ -149,6 +156,30 @@ Other design conventions:
   budget, amber at or above 80%, and green below 80%. The hero has related
   over-budget and remaining-budget status logic.
 - Daily ribbon values are derived by summing expenses for each calendar day.
+
+### Weekly view
+
+- Weeks start on Monday and are clipped to the selected month. The opening
+  week is the current week for the current month, the final week for a past
+  month, and the first week for a future month.
+- Current and past weeks use a static share of the monthly budget and category
+  limits, proportional to the number of days in that clipped week.
+- Future weeks in the current month use an adaptive allowance: the amount left
+  in the month is divided across the days after today, then multiplied by the
+  number of days in the selected week. Each category's future allowance is
+  based on that category's own remaining monthly limit, spread across the same
+  days after today; a category cannot receive a future share larger than its
+  remaining monthly amount.
+- Weekly remaining amounts are allowance minus spending within that week.
+  Future allowances are zero when the month is already over budget.
+- Status tones use the same thresholds as category progress: red at or above
+  100%, amber at or above 80%, and green below 80%.
+- Allowances, remaining amounts, and aggregated spending are rounded to cents;
+  category allowance rounding differences are not redistributed. Hero, rail,
+  and dock values use whole-dollar formatting where specified.
+- Category rows sort by weekly spend-to-allowance ratio, descending, retaining
+  the source category order for ties. No weekly values are persisted or sent to
+  the API.
 
 ### Dates and month selection
 
@@ -317,6 +348,11 @@ across devices without implementing and verifying those capabilities.
   fail in-browser.
 - There is no test script configured in `package.json`; build and diagnostics
   are the available routine checks unless tests are added.
+- Weekly fixed costs are not separated: Bills & Utilities and other fixed
+  expenses count like ordinary categories, so weekly "left" can be inflated
+  until a bill is paid.
+- The Weekly view is limited to weeks inside the selected month; change the
+  Overview month to access another month's weeks.
 
 ## Project structure
 
@@ -346,6 +382,10 @@ src/
     overview/
       Overview.jsx                 Monthly calculations and overview components
       overview.css
+    week/
+      weekCalculations.js           Pure weekly budget and date calculations
+      WeekSheet.jsx                 Weekly allowance, day rail, and category sheet
+      week.css                      Weekly dock and sheet styling
     settings/
       SettingsSheet.jsx            Monthly/category settings UI
       settingsService.js           Local settings persistence and sample reset

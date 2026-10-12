@@ -6,6 +6,12 @@ import AllExpensesSheet from "./features/expenses/AllExpensesSheet.jsx";
 import ExpenseSheet from "./features/expenses/ExpenseSheet.jsx";
 import Overview from "./features/overview/Overview.jsx";
 import SettingsSheet from "./features/settings/SettingsSheet.jsx";
+import WeekSheet from "./features/week/WeekSheet.jsx";
+import {
+  calculateWeek,
+  formatWeekDockValue,
+  pickOpeningWeek,
+} from "./features/week/weekCalculations.js";
 import { useAppState } from "./state/AppContext.jsx";
 
 function App() {
@@ -25,6 +31,22 @@ function App() {
     (total, month) => total + month.exp.length,
     0,
   );
+  const currentMonth = state.data.months[state.currentMonth];
+  const dockWeek = currentMonth
+    ? calculateWeek({
+        monthKey: state.currentMonth,
+        month: currentMonth,
+        weekIndex: pickOpeningWeek({ monthKey: state.currentMonth }),
+      })
+    : null;
+  const dockWeekValue = dockWeek
+    ? formatWeekDockValue(dockWeek.left)
+    : null;
+  const dockWeekLabel = dockWeek
+    ? dockWeek.left < 0
+      ? `${dockWeek.subtitle}, over by ${formatWeekDockValue(Math.abs(dockWeek.left))}`
+      : `${dockWeek.subtitle}, ${dockWeekValue} left`
+    : null;
   const isLoading = state.storageStatus === "loading";
   const isBlocking = isLoading || isRefreshing || isOperationLoading;
 
@@ -153,6 +175,41 @@ function App() {
                 <span aria-hidden="true">☷</span>
                 {expenseCount}
               </button>
+              <span className="expense-dock-divider" aria-hidden="true" />
+              <button
+                className={`expense-dock-week week-dock-${dockWeek.tone}`}
+                type="button"
+                aria-label={dockWeekLabel}
+                onClick={() => setActiveSheet({ type: "week" })}
+              >
+                <svg
+                  className="week-dock-ring"
+                  viewBox="0 0 18 18"
+                  aria-hidden="true"
+                >
+                  <circle
+                    cx="9"
+                    cy="9"
+                    r="7"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    opacity="0.28"
+                  />
+                  <circle
+                    cx="9"
+                    cy="9"
+                    r="7"
+                    fill="none"
+                    stroke="var(--ok)"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeDasharray="24 20"
+                    transform="rotate(-90 9 9)"
+                  />
+                </svg>
+                <span className="week-dock-value">{dockWeekValue}</span>
+              </button>
             </div>
             <BottomSheet
               open={Boolean(activeSheet)}
@@ -161,6 +218,8 @@ function App() {
                 activeSheet?.type === "allExpenses" ||
                 activeSheet?.expenseFromAllExpenses
                   ? "sheet-all-expenses"
+                  : activeSheet?.type === "week"
+                    ? "sheet-week"
                   : ""
               }
             >
@@ -208,6 +267,9 @@ function App() {
               )}
               {activeSheet?.type === "settings" && (
                 <SettingsSheet onClose={() => setActiveSheet(null)} />
+              )}
+              {activeSheet?.type === "week" && (
+                <WeekSheet onClose={() => setActiveSheet(null)} />
               )}
             </BottomSheet>
           </>

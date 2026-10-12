@@ -9,6 +9,10 @@
   --bad: #d13b3b;
   --track: #e1e8e3;
   --card: #fff;
+  --line-strong: #cdd7d2;
+  --ok-on-ink: #4ade80;
+  --warn-on-ink: #fbbf24;
+  --bad-on-ink: #f87171;
   color-scheme: light dark;
   box-sizing: border-box;
 }
@@ -25,5 +29,9 @@
     --bad: #f87171;
     --track: #1c2a27;
     --card: #13201d;
+    --line-strong: #2a3b37;
+    --ok-on-ink: #178a4c;
+    --warn-on-ink: #c2670a;
+    --bad-on-ink: #d13b3b;
   }
 }
