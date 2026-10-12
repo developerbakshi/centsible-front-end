@@ -112,10 +112,14 @@ export function calculateWeek({
   const currentMonth = getMonthKey(today);
   const isCurrentMonth = monthKey === currentMonth;
   const currentWeekIndex = isCurrentMonth ? pickOpeningWeek({ monthKey, today }) : -1;
+  const currentWeek = isCurrentMonth ? weeks[currentWeekIndex] : null;
   const relation = getRelation(monthKey, week, today);
   const subtitle = makeSubtitle(week, relation, currentWeekIndex, isCurrentMonth);
   const categorySpent = new Map(month.cats.map(({ id }) => [id, 0]));
   const monthCategorySpent = new Map(month.cats.map(({ id }) => [id, 0]));
+  const currentWeekCategorySpent = new Map(
+    month.cats.map(({ id }) => [id, 0]),
+  );
   const daySpent = new Map();
   let spent = 0;
   let monthSpent = 0;
@@ -127,6 +131,16 @@ export function calculateWeek({
       expense.cat,
       (monthCategorySpent.get(expense.cat) || 0) + expense.amt,
     );
+    if (
+      currentWeek &&
+      expense.date >= currentWeek.start &&
+      expense.date <= currentWeek.end
+    ) {
+      currentWeekCategorySpent.set(
+        expense.cat,
+        (currentWeekCategorySpent.get(expense.cat) || 0) + expense.amt,
+      );
+    }
     if (expense.date < week.start || expense.date > week.end) return;
 
     spent += expense.amt;
@@ -146,6 +160,9 @@ export function calculateWeek({
   monthCategorySpent.forEach((amount, id) =>
     monthCategorySpent.set(id, r2(amount)),
   );
+  currentWeekCategorySpent.forEach((amount, id) =>
+    currentWeekCategorySpent.set(id, r2(amount)),
+  );
   daySpent.forEach((amount, date) => daySpent.set(date, r2(amount)));
 
   let allowance;
@@ -162,14 +179,43 @@ export function calculateWeek({
       const categoryLeftNow = r2(
         category.limit - (monthCategorySpent.get(category.id) || 0),
       );
-      return categoryLeftNow > 0 && daysAfterToday > 0
-        ? r2((categoryLeftNow * week.days) / daysAfterToday)
+      const categorySpentThisWeek =
+        currentWeekCategorySpent.get(category.id) || 0;
+      const currentWeekStaticShare = r2(
+        (category.limit * currentWeek.days) / totalDays,
+      );
+      const currentWeekRemainingAllowance = Math.min(
+        currentWeekStaticShare,
+        Math.max(0, r2(categoryLeftNow + categorySpentThisWeek)),
+      );
+      const currentWeekLeft = r2(
+        currentWeekRemainingAllowance - categorySpentThisWeek,
+      );
+      const availableAfterCurrentWeek = Math.max(
+        0,
+        r2(categoryLeftNow - Math.max(0, currentWeekLeft)),
+      );
+      const daysAfterCurrentWeek = totalDays - currentWeek.endDay;
+
+      return availableAfterCurrentWeek > 0 && daysAfterCurrentWeek > 0
+        ? r2((availableAfterCurrentWeek * week.days) / daysAfterCurrentWeek)
         : 0;
     };
   } else {
     allowance = r2((month.budget * week.days) / totalDays);
-    categoryAllowance = (category) =>
-      r2((category.limit * week.days) / totalDays);
+    categoryAllowance = (category) => {
+      const staticShare = r2((category.limit * week.days) / totalDays);
+      if (relation !== "current" || !isCurrentMonth) return staticShare;
+
+      const categoryLeftNow = r2(
+        category.limit - (monthCategorySpent.get(category.id) || 0),
+      );
+      const currentWeekSpent = categorySpent.get(category.id) || 0;
+      return Math.min(
+        staticShare,
+        Math.max(0, r2(categoryLeftNow + currentWeekSpent)),
+      );
+    };
   }
 
   const left = r2(allowance - spent);

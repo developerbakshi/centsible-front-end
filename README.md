@@ -162,14 +162,18 @@ Other design conventions:
 - Weeks start on Monday and are clipped to the selected month. The opening
   week is the current week for the current month, the final week for a past
   month, and the first week for a future month.
-- Current and past weeks use a static share of the monthly budget and category
-  limits, proportional to the number of days in that clipped week.
+- Past weeks use a static share of the monthly budget and category limits,
+  proportional to the number of days in that clipped week. The current week's
+  category allowance is also based on its static share, but is capped so its
+  remaining amount cannot exceed that category's actual remaining monthly
+  budget.
 - Future weeks in the current month use an adaptive allowance: the amount left
   in the month is divided across the days after today, then multiplied by the
-  number of days in the selected week. Each category's future allowance is
-  based on that category's own remaining monthly limit, spread across the same
-  days after today; a category cannot receive a future share larger than its
-  remaining monthly amount.
+  number of days in the selected week. Future category allowances use that
+  category's remaining monthly limit after reserving the current week's
+  unspent allowance, then distribute any remainder across days after the
+  current week. This prevents the same category dollars from appearing as
+  available in both the current week and a later week.
 - Weekly remaining amounts are allowance minus spending within that week.
   Future allowances are zero when the month is already over budget.
 - Status tones use the same thresholds as category progress: red at or above
