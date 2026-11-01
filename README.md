@@ -28,6 +28,8 @@ iPhone experience, not a desktop-responsive product.
 ### Overview
 
 - Shows the selected month and year with previous/next month controls.
+- Keeps the compact month title and arrows together in a translucent sticky
+  navigation bar.
 - Keeps the month navigator sticky at the top of the app’s scroll area. The
   Centsible wordmark scrolls away while the month selector remains visible.
 - Shows the monthly budget remaining, spending status relative to an even pace,
@@ -41,20 +43,22 @@ iPhone experience, not a desktop-responsive product.
 
 ### Expense actions and sheets
 
-- A fixed bottom split pill contains **Add** and **All expenses** actions.
+- A fixed bottom pill contains only **Add** and **All expenses** actions, matching
+  the supplied HTML. There is no weekly entry point in the pill.
 - **Add** is visible but disabled. Adding expenses is not currently available
   through the interface.
-- **All expenses** opens a tall scrolling sheet with all loaded expenses, sorted
-  newest first by API `created_at`.
-- A third dock segment opens the Weekly view. Its sheet shows a month-clipped
-  calendar week, its remaining allowance, daily spending rail, and category
-  shares; arrows navigate weeks within the selected month.
+- **All expenses** opens a tall scrolling sheet with expenses from the selected
+  month only, sorted newest first by API `created_at`. The dock count uses that
+  same selected-month expense set.
 - An all-expenses row shows merchant, amount, category emoji and name, bank,
   expense date, and—when the API date contains a time—the local time.
 - Selecting an expense opens the existing edit sheet. Cancel returns to the
   all-expenses list.
 - Category detail shows category spending, remaining budget, and the category’s
-  expenses. Selecting an expense opens the same edit sheet.
+  weekly budget schedule and expenses. Weekly category allowances are allocated
+  from the category's remaining budget across the remaining weeks. The current
+  week's allowance is fixed at the start of that week; an overage reduces the
+  pool split across future weeks. Selecting an expense opens the same edit sheet.
 - Expense date is read-only in the edit sheet because the update API does not
   support editing dates.
 - Expense delete controls remain visible but disabled. The frontend has local
@@ -95,16 +99,16 @@ The palette is defined in [`src/styles/tokens.css`](./src/styles/tokens.css):
 
 | Token | Light | Dark | Purpose |
 | --- | --- | --- | --- |
-| `--bg` | `#f3f6f2` | `#0a100f` | Main background |
-| `--ink` | `#0d1f1b` | `#eaf2ef` | Primary text |
-| `--mute` | `#66756f` | `#8aa098` | Secondary text |
-| `--line` | `#dbe3de` | `#1f2d2a` | Borders and dividers |
-| `--acc` | `#0a6b5c` | `#34d3b6` | Teal accent |
+| `--bg` | `#f3f6f2` | `#0b0f14` | Main background |
+| `--ink` | `#0d1f1b` | `#eaf1f8` | Primary text |
+| `--mute` | `#66756f` | `#8b9aab` | Secondary text |
+| `--line` | `#dbe3de` | `#202b36` | Borders and dividers |
+| `--acc` | `#0a6b5c` | `#5aa9ff` | Teal/blue accent |
 | `--ok` | `#178a4c` | `#4ade80` | Within-budget status |
 | `--warn` | `#c2670a` | `#fbbf24` | Caution status |
 | `--bad` | `#d13b3b` | `#f87171` | Over-budget/error status |
-| `--track` | `#e1e8e3` | `#1c2a27` | Progress track |
-| `--card` | `#fff` | `#13201d` | Card surface |
+| `--track` | `#e1e8e3` | `#1d2833` | Progress track |
+| `--card` | `#fff` | `#141b23` | Card surface |
 | `--line-strong` | `#cdd7d2` | `#2a3b37` | Weekly rail zero-day stub |
 | `--ok-on-ink` | `#4ade80` | `#178a4c` | Green status on the dock |
 | `--warn-on-ink` | `#fbbf24` | `#c2670a` | Amber status on the dock |
@@ -119,6 +123,7 @@ Other design conventions:
   suggesting a cent sign. Existing icons and loader assets live under `public/`.
 - The month navigator is sticky at `top: 0`. Safe-area top padding is applied to
   the scrolling brand row so the sticky navigator can reach the top edge.
+- Dark appearance follows the system and uses the updated slate/blue palette.
 - The main app scroll container handles horizontal overflow; bottom sheets
   account for the home-indicator safe area.
 - Motion should remain restrained and consistent with the existing progress
@@ -146,6 +151,9 @@ Other design conventions:
   includes today.
 - The even-spend pace is elapsed days divided by total days while the month is
   in progress. For a closed or not-yet-started month, pace is `null`.
+- On the final day of the current month, pace is also `null`; the status reads
+  `Last day of the month` rather than incorrectly saying the month has not
+  started.
 - `paceDifference` is actual spending minus the budget amount expected at the
   even-spend pace. A positive result is “ahead of” (overspending relative to)
   the pace; a negative result is “under” the pace.
@@ -157,33 +165,36 @@ Other design conventions:
   over-budget and remaining-budget status logic.
 - Daily ribbon values are derived by summing expenses for each calendar day.
 
-### Weekly view
+### Weekly category budgets
 
 - Weeks start on Monday and are clipped to the selected month. The opening
   week is the current week for the current month, the final week for a past
   month, and the first week for a future month.
-- Past weeks use a static share of the monthly budget and category limits,
-  proportional to the number of days in that clipped week. The current week's
-  category allowance is also based on its static share, but is capped so its
-  remaining amount cannot exceed that category's actual remaining monthly
-  budget.
+- The weekly hero uses a static share of the monthly budget for current/past
+  weeks and adapts future-week shares to the month balance.
+- Past category weeks deduct actual spending from the monthly category limit.
+  At the start of the current week, the remaining category balance is divided
+  by the number of weeks remaining, establishing a fixed allowance for that
+  week. Current-week spending changes its remaining/over amount but does not
+  recalculate its allowance.
 - Future weeks in the current month use an adaptive allowance: the amount left
   in the month is divided across the days after today, then multiplied by the
-  number of days in the selected week. Future category allowances use that
-  category's remaining monthly limit after reserving the current week's
-  unspent allowance, then distribute any remainder across days after the
-  current week. This prevents the same category dollars from appearing as
-  available in both the current week and a later week.
+  number of days in the selected week. After the current week, the remaining
+  category balance is divided equally across the future weeks. If actual
+  current-week spending exceeds its allowance, those future shares use the
+  reduced balance after actual spending. An underspend remains reserved during
+  the current week, then rolls into the available balance when that week is
+  past because past weeks deduct actual spending only.
 - Weekly remaining amounts are allowance minus spending within that week.
-  Future allowances are zero when the month is already over budget.
+  Future hero allowances are zero when the month is already over budget.
 - Status tones use the same thresholds as category progress: red at or above
   100%, amber at or above 80%, and green below 80%.
 - Allowances, remaining amounts, and aggregated spending are rounded to cents;
   category allowance rounding differences are not redistributed. Hero, rail,
   and dock values use whole-dollar formatting where specified.
 - Category rows sort by weekly spend-to-allowance ratio, descending, retaining
-  the source category order for ties. No weekly values are persisted or sent to
-  the API.
+  the source category order for ties. Category allowance rounding differences
+  are not redistributed. No weekly values are persisted or sent to the API.
 
 ### Dates and month selection
 
@@ -355,8 +366,9 @@ across devices without implementing and verifying those capabilities.
 - Weekly fixed costs are not separated: Bills & Utilities and other fixed
   expenses count like ordinary categories, so weekly "left" can be inflated
   until a bill is paid.
-- The Weekly view is limited to weeks inside the selected month; change the
-  Overview month to access another month's weeks.
+- PWA installation provides a cached app shell and static assets, but expense
+  and category data still require a network connection to the existing API.
+  Installation on iPhone is through Safari's Share menu → Add to Home Screen.
 
 ## Project structure
 
@@ -414,6 +426,9 @@ src/
 public/
   centsible-loader-ripple.svg       Animated blocking loader
   favicon and Apple touch icons      Browser/home-screen branding
+  pwa-icon.svg and pwa-icon-*.png   PWA install icons
+  manifest.webmanifest              Installable PWA metadata
+  service-worker.js                 App shell/static asset cache only
 ```
 
 Use functional React components and hooks. Keep API, storage, date, currency,
@@ -444,6 +459,11 @@ Create and preview a production build:
 npm run build
 npm run preview
 ```
+
+On iPhone, open the deployed HTTPS app in Safari, use **Share**, then choose
+**Add to Home Screen**. The app shell and static assets are cached by the
+service worker; API-backed data still requires network access. API requests and
+the API contract are unchanged.
 
 Current Vercel settings for this Vite app:
 

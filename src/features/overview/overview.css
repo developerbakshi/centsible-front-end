@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 8px;
+  gap: 0;
 }
 
 .overview-header-top {
@@ -13,8 +13,8 @@
 }
 
 .word {
-  font-size: 26px;
-  letter-spacing: -0.6px;
+  font-size: 20px;
+  letter-spacing: -0.4px;
   font-weight: 600;
 }
 
@@ -27,52 +27,60 @@
   position: sticky;
   z-index: 2;
   top: 0;
-  margin: 0 -22px;
-  padding: 0 22px;
-  background: var(--bg);
-  border-bottom: 1px solid var(--line);
+  margin: 0 -20px;
+  padding: 0 20px;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  border-bottom: 0.5px solid var(--line);
 }
 
 .month {
-  display: grid;
-  grid-template-columns: 44px 1fr 44px;
-  align-self: stretch;
+  display: flex;
   align-items: center;
-  min-height: 52px;
+  justify-content: space-between;
+  height: 56px;
 }
 
-.month button {
+.month-controls {
+  display: flex;
+  align-items: center;
+}
+
+.month-controls button {
   display: grid;
   width: 44px;
   min-width: 44px;
-  height: 52px;
+  height: 56px;
   place-items: center;
   color: var(--acc);
-  font-size: 34px;
+  font-size: 30px;
   font-weight: 300;
   line-height: 1;
 }
 
 .month-label {
-  display: grid;
-  justify-items: center;
-  gap: 1px;
-  line-height: 1.15;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 0;
+  color: var(--ink);
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.6px;
 }
 
 .month-label span:first-child {
   color: var(--ink);
-  font-size: 20px;
-  font-weight: 700;
 }
 
 .month-label span:last-child {
   color: var(--mute);
-  font-size: 13px;
+  font-size: 20px;
   font-weight: 500;
 }
 
-.month button:disabled,
+.month-controls button:disabled,
 .settings-button:disabled {
   cursor: default;
   opacity: 1;
@@ -95,17 +103,18 @@
 }
 
 .hero {
-  padding: 18px 0 6px;
+  padding: 0;
 }
 
 .lbl {
+  margin-top: 16px;
   font-size: 13px;
   color: var(--mute);
   font-weight: 600;
 }
 
 .big {
-  font-size: 74px;
+  font-size: 72px;
   font-weight: 200;
   letter-spacing: -3px;
   line-height: 1;
@@ -129,6 +138,10 @@
   opacity: 0.7;
 }
 
+.hero .ok {
+  color: var(--acc);
+}
+
 .ok {
   color: var(--ok);
 }
@@ -144,7 +157,7 @@
 .status {
   font-size: 15px;
   font-weight: 600;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .bar {
@@ -153,6 +166,10 @@
   background: var(--track);
   border-radius: 6px;
   margin: 14px 0 8px;
+}
+
+.hero .bar {
+  margin: 12px 0 8px;
 }
 
 .fill {
@@ -200,7 +217,7 @@
   align-items: flex-end;
   gap: 2px;
   height: 34px;
-  margin-top: 18px;
+  margin-top: 16px;
 }
 
 .ribbon i {
@@ -236,44 +253,56 @@
 
 .trio {
   display: flex;
-  margin-top: 20px;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
+  margin-top: 18px;
+  border-top: 0.5px solid var(--line);
+  border-bottom: 0.5px solid var(--line);
 }
 
 .trio div {
   flex: 1;
-  padding: 12px 0;
+  padding: 12px 0 12px 14px;
   font-size: 12px;
   color: var(--mute);
 }
 
+.trio div:first-child {
+  padding-left: 0;
+}
+
 .trio div + div {
-  padding-left: 14px;
-  border-left: 1px solid var(--line);
+  border-left: 0.5px solid var(--line);
 }
 
 .trio b {
   display: block;
-  font-size: 20px;
+  font-size: 19px;
   font-weight: 600;
   color: var(--ink);
-  letter-spacing: -0.5px;
+  letter-spacing: -0.4px;
 }
 
 .sect {
   font-size: 13px;
-  font-weight: 600;
   color: var(--mute);
-  margin: 26px 0 2px;
+  margin: 26px 16px 6px;
+}
+
+.category-list {
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--card);
 }
 
 .cat {
   width: 100%;
   text-align: left;
   display: block;
-  padding: 18px 0 16px;
-  border-bottom: 1px solid var(--line);
+  padding: 14px 16px 12px;
+  border-bottom: 0.5px solid var(--line);
+}
+
+.cat:last-child {
+  border-bottom: 0;
 }
 
 .cat .top {
@@ -283,8 +312,8 @@
 }
 
 .cat .nm {
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 17px;
+  font-weight: 600;
   letter-spacing: -0.3px;
 }
 
@@ -295,7 +324,7 @@
 
 .cat .bar {
   height: 10px;
-  margin: 22px 0 16px;
+  margin: 24px 0 14px;
   overflow: visible;
 }
 
@@ -331,9 +360,9 @@
 }
 
 .sl b {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 300;
-  letter-spacing: -0.8px;
+  letter-spacing: -0.6px;
 }
 
 .sl div:last-child {

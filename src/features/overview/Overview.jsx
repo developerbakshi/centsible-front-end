@@ -63,7 +63,12 @@ function calculateOverview(monthKeyValue, month, today = new Date()) {
   if (overBudget) {
     status = "Over budget — time to ease off";
   } else if (pace === null) {
-    status = daysLeft ? "Month hasn't started" : "Month closed";
+    status =
+      monthKeyValue > todayMonth
+        ? "Month hasn’t started"
+        : monthKeyValue < todayMonth
+          ? "Month closed"
+          : "Last day of the month";
   } else if (paceDifference > 0) {
     status = `${formatCurrency(paceDifference)} ahead of an even pace`;
   } else {
@@ -324,24 +329,26 @@ function Overview({ onSelectCategory, onOpenSettings }) {
       </header>
       <div className="month-sticky">
         <div className="month">
-          <button
-            type="button"
-            aria-label="Previous month"
-            onClick={() => changeMonth(-1)}
-          >
-            <span aria-hidden="true">‹</span>
-          </button>
-          <div className="month-label">
+          <h1 className="month-label">
             <span>{selectedMonthName}</span>
             <span>{selectedYear}</span>
+          </h1>
+          <div className="month-controls">
+            <button
+              type="button"
+              aria-label="Previous month"
+              onClick={() => changeMonth(-1)}
+            >
+              <span aria-hidden="true">‹</span>
+            </button>
+            <button
+              type="button"
+              aria-label="Next month"
+              onClick={() => changeMonth(1)}
+            >
+              <span aria-hidden="true">›</span>
+            </button>
           </div>
-          <button
-            type="button"
-            aria-label="Next month"
-            onClick={() => changeMonth(1)}
-          >
-            <span aria-hidden="true">›</span>
-          </button>
         </div>
       </div>
       {state.storageError && (
@@ -354,7 +361,7 @@ function Overview({ onSelectCategory, onOpenSettings }) {
         overview={overview}
         animationKey={state.currentMonth}
       />
-      <div className="sect">Categories · most used first</div>
+      <div className="sect">Categories, most used first</div>
       <div className="category-list">
         {overview.categories.map(({ category, spent }) => (
           <CategoryRow

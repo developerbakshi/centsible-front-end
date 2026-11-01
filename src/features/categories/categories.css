@@ -7,6 +7,61 @@
   margin-top: 0;
 }
 
+.category-weekly {
+  margin: 16px 0 0;
+}
+
+.category-weekly h2 {
+  margin: 0 4px 6px;
+  color: var(--mute);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.category-weekly-table {
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--card);
+}
+
+.category-weekly-row {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1fr 1fr;
+  gap: 4px;
+  padding: 10px 12px;
+  border-bottom: 0.5px solid var(--line);
+  font-size: 13px;
+}
+
+.category-weekly-row:last-child {
+  border-bottom: 0;
+}
+
+.category-weekly-row span:nth-child(n + 2) {
+  text-align: right;
+}
+
+.category-weekly-row.is-heading {
+  color: var(--mute);
+  font-size: 12px;
+}
+
+.category-weekly-row.is-current {
+  color: var(--acc);
+  font-weight: 600;
+}
+
+.category-weekly-row.is-future {
+  color: var(--mute);
+}
+
+.category-weekly-over {
+  margin: 8px 4px 0;
+  color: var(--bad);
+  font-size: 13px;
+  font-weight: 600;
+}
+
 .category-sheet .expense-list {
   margin-top: 12px;
   padding: 8px 14px;

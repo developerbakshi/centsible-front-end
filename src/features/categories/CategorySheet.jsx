@@ -1,9 +1,22 @@
 import React, { useState } from "react";
 import { useAppState } from "../../state/AppContext.jsx";
-import { formatCurrencyWithCents } from "../../utils/currency.js";
+import {
+  formatCurrency,
+  formatCurrencyWithCents,
+} from "../../utils/currency.js";
 import { formatCategoryName } from "../../utils/category.js";
 import { formatDateDDMMYYYY } from "../../utils/date.js";
+import { calculateCategoryWeeks } from "../week/weekCalculations.js";
 import "./categories.css";
+
+function formatWeekRange(monthKey, week) {
+  const [year, month] = monthKey.split("-").map(Number);
+  const start = new Date(year, month - 1, week.startDay);
+  const monthLabel = start.toLocaleDateString("en-US", { month: "short" });
+  return week.startDay === week.endDay
+    ? `${monthLabel} ${week.startDay}`
+    : `${monthLabel} ${week.startDay}–${week.endDay}`;
+}
 
 function CategorySheet({ categoryId, onClose, onAdd, onEdit }) {
   const { state, deleteExpense } = useAppState();
@@ -29,6 +42,11 @@ function CategorySheet({ categoryId, onClose, onAdd, onEdit }) {
     .sort((first, second) => second.date.localeCompare(first.date));
   const spent = expenses.reduce((total, expense) => total + expense.amt, 0);
   const left = category.limit - spent;
+  const weeklyBudgets = calculateCategoryWeeks({
+    monthKey: state.currentMonth,
+    category,
+    expenses: month.exp,
+  });
 
   async function handleDelete(expense) {
     setError("");
@@ -64,6 +82,40 @@ function CategorySheet({ categoryId, onClose, onAdd, onEdit }) {
           </b>
         </div>
       </div>
+      <section className="category-weekly">
+        <h2>Weekly budget</h2>
+        <div className="category-weekly-table">
+          <div className="category-weekly-row is-heading" aria-hidden="true">
+            <span>Week</span>
+            <span>Allowed</span>
+            <span>Spent</span>
+            <span>Left</span>
+          </div>
+          {weeklyBudgets.map((week) => (
+            <div
+              className={`category-weekly-row${week.isFuture ? " is-future" : ""}${week.isCurrent ? " is-current" : ""}`}
+              key={week.start}
+            >
+              <span>{formatWeekRange(state.currentMonth, week)}</span>
+              <span>{formatCurrency(week.allowance)}</span>
+              <span>{week.isFuture ? "—" : formatCurrency(week.spent)}</span>
+              <span>
+                {week.isFuture
+                  ? ""
+                  : week.left < 0
+                    ? `−${formatCurrency(Math.abs(week.left))}`
+                    : formatCurrency(week.left)}
+              </span>
+            </div>
+          ))}
+        </div>
+        {spent > category.limit && (
+          <p className="category-weekly-over">
+            Over monthly limit by {formatCurrency(spent - category.limit)}.
+            Later weeks show $0.
+          </p>
+        )}
+      </section>
       <div className="card expense-list">
         {expenses.length ? (
           expenses.map((expense) => (

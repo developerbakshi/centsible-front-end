@@ -7,22 +7,20 @@ import "./expenses.css";
 
 function AllExpensesSheet({ onClose, onEdit }) {
   const { state } = useAppState();
+  const selectedMonth = state.data.months[state.currentMonth];
   const expenses = useMemo(
-    () =>
-      Object.entries(state.data.months)
-        .flatMap(([monthKey, month]) =>
-          month.exp.map((expense) => ({
-            ...expense,
-            monthKey,
-            category: month.cats.find(({ id }) => id === expense.cat),
-          })),
-        )
-        .sort(
-          (first, second) =>
-            new Date(second.createdAt).getTime() -
-            new Date(first.createdAt).getTime(),
-        ),
-    [state.data.months],
+    () => selectedMonth.exp
+      .map((expense) => ({
+        ...expense,
+        monthKey: state.currentMonth,
+        category: selectedMonth.cats.find(({ id }) => id === expense.cat),
+      }))
+      .sort(
+        (first, second) =>
+          new Date(second.createdAt).getTime() -
+          new Date(first.createdAt).getTime(),
+      ),
+    [selectedMonth, state.currentMonth],
   );
 
   return (
