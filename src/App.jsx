@@ -8,6 +8,13 @@ import Overview from "./features/overview/Overview.jsx";
 import SettingsSheet from "./features/settings/SettingsSheet.jsx";
 import { useAppState } from "./state/AppContext.jsx";
 
+function isStandaloneApp() {
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.navigator.standalone === true
+  );
+}
+
 function App() {
   const {
     state,
@@ -25,6 +32,7 @@ function App() {
   const expenseCount = currentMonth?.exp.length ?? 0;
   const isLoading = state.storageStatus === "loading";
   const isBlocking = isLoading || isRefreshing || isOperationLoading;
+  const isPwaStartup = isLoading && isStandaloneApp();
 
   useEffect(() => {
     const refreshOnForeground = () => {
@@ -210,7 +218,7 @@ function App() {
           </>
         ) : null}
       </div>
-      {isBlocking && <LoadingOverlay />}
+      {isBlocking && <LoadingOverlay splash={isPwaStartup} />}
     </div>
   );
 }

@@ -369,6 +369,11 @@ across devices without implementing and verifying those capabilities.
 - PWA installation provides a cached app shell and static assets, but expense
   and category data still require a network connection to the existing API.
   Installation on iPhone is through Safari's Share menu → Add to Home Screen.
+- The iPhone 17 Pro PWA uses the supplied 1206 × 2622 launch images in light or
+  dark mode according to the system appearance. iOS Home Screen launch screens
+  use the matching Apple startup-image link; the in-app startup overlay shows
+  the same image while the initial API data loads. Browser loads and later
+  refresh/operation loaders retain the ripple overlay.
 
 ## Project structure
 

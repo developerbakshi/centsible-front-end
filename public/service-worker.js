@@ -1,4 +1,4 @@
-const CACHE_NAME = "centsible-shell-v1";
+const CACHE_NAME = "centsible-shell-v2";
 const APP_SHELL = [
   "/",
   "/manifest.webmanifest",
@@ -6,6 +6,8 @@ const APP_SHELL = [
   "/pwa-icon-192.png",
   "/pwa-icon-512.png",
   "/centsible-apple-touch-icon.png",
+  "/centsible-splash-1206x2622-light.png",
+  "/centsible-splash-1206x2622-dark.png",
 ];
 
 self.addEventListener("install", (event) => {
