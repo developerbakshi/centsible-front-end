@@ -11,9 +11,11 @@ import React, {
 import { appReducer, createInitialState } from "./appReducer.js";
 import { saveAppData } from "../services/storage/appDataService.js";
 import { getCategories } from "../services/categories/categoryService.js";
-import { getExpenses } from "../services/expenses/expenseService.js";
 import {
-  addExpense as addExpenseService,
+  createExpense as createExpenseApi,
+  getExpenses,
+} from "../services/expenses/expenseService.js";
+import {
   deleteExpense as deleteExpenseService,
   updateExpense as updateExpenseService,
 } from "../features/expenses/expenseService.js";
@@ -115,6 +117,7 @@ export function AppProvider({ children }) {
         await saveAppData(data);
         dispatch({ type: "data/refresh", data });
         setRefreshStatus({ isRefreshing: false, error: null });
+        return data;
       } catch (error) {
         setRefreshStatus({
           isRefreshing: false,
@@ -157,8 +160,77 @@ export function AppProvider({ children }) {
     [dispatch, state.data, state.storageStatus],
   );
   const addExpense = useCallback(
-    (expense) => runExpenseOperation(addExpenseService, expense),
-    [runExpenseOperation],
+    async ({ categoryId, amount, merchant, bank }) => {
+      if (state.storageStatus === "load-error") {
+        throw new Error("Saved expenses could not be loaded.");
+      }
+
+      const month = state.data.months[state.currentMonth];
+      const category = month?.cats.find(({ id }) => id === categoryId);
+      if (
+        !category ||
+        !Number.isFinite(amount) ||
+        amount === 0 ||
+        typeof merchant !== "string" ||
+        typeof bank !== "string"
+      ) {
+        throw new Error("Expense details are invalid.");
+      }
+
+      const existingIds = new Set(
+        Object.values(state.data.months).flatMap(({ exp }) =>
+          exp.map(({ id }) => id),
+        ),
+      );
+      await createExpenseApi({
+        amount: Math.round(amount * 100) / 100,
+        category: category.name.toLocaleUpperCase("en-US"),
+        merchant: merchant.trim(),
+        bank: bank.trim(),
+      });
+
+      let refreshedData;
+      try {
+        refreshedData = await refreshData();
+      } catch (error) {
+        const reloadError = new Error(
+          "The expense was submitted, but the app couldn't reload it. Refresh before trying again.",
+          { cause: error },
+        );
+        reloadError.expenseCreated = true;
+        throw reloadError;
+      }
+
+      const newExpenses = Object.values(refreshedData.months)
+        .flatMap(({ exp }) => exp)
+        .filter(({ id }) => !existingIds.has(id));
+      const matchingExpenses = newExpenses.filter(
+        (expense) =>
+          expense.cat === categoryId &&
+          Math.round(expense.amt * 100) === Math.round(amount * 100) &&
+          expense.merchant === merchant.trim() &&
+          expense.bank === bank.trim(),
+      );
+      const addedExpense =
+        matchingExpenses.length === 1
+          ? matchingExpenses[0]
+          : newExpenses.length === 1
+            ? newExpenses[0]
+            : null;
+      if (!addedExpense) {
+        const reloadError = new Error(
+          "The API accepted the expense, but it hasn't appeared in the refreshed list. Refresh before trying again.",
+        );
+        reloadError.expenseCreated = true;
+        throw reloadError;
+      }
+
+      dispatch({
+        type: "month/change",
+        month: addedExpense.date.slice(0, 7),
+      });
+    },
+    [dispatch, refreshData, state.currentMonth, state.data, state.storageStatus],
   );
   const updateExpense = useCallback(
     (expense) => runExpenseOperation(updateExpenseService, expense),

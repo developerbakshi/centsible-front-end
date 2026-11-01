@@ -2,15 +2,15 @@ import React, { useEffect, useRef, useState } from "react";
 import { useAppState } from "../../state/AppContext.jsx";
 import { formatCategoryName } from "../../utils/category.js";
 import { parseDollarAmount } from "../../utils/currency.js";
-import { daysInMonth, monthKey, padDatePart } from "../../utils/date.js";
+import { daysInMonth, padDatePart } from "../../utils/date.js";
 import "./expenses.css";
 
-function getDefaultDate(currentMonth) {
-  const today = new Date();
-  if (currentMonth === monthKey(today)) {
-    return `${currentMonth}-${padDatePart(today.getDate())}`;
-  }
-  return `${currentMonth}-01`;
+function getExpenseParties(expense) {
+  const [noteMerchant = "", ...bankParts] = (expense?.note || "").split(" · ");
+  return {
+    merchant: expense?.merchant ?? noteMerchant,
+    bank: expense?.bank ?? bankParts.join(" · "),
+  };
 }
 
 function isAllowedAmountInput(value) {
@@ -29,6 +29,7 @@ function ExpenseSheet({
   const expense = expenseId
     ? month.exp.find((item) => item.id === expenseId)
     : null;
+  const expenseParties = getExpenseParties(expense);
   const [amount, setAmount] = useState(() =>
     expense ? expense.amt.toFixed(2) : "",
   );
@@ -36,11 +37,13 @@ function ExpenseSheet({
     () => expense?.cat || preselectedCategoryId,
   );
   const [date, setDate] = useState(() =>
-    expense ? expense.date : getDefaultDate(selectedMonthKey),
+    expense ? expense.date : "",
   );
-  const [note, setNote] = useState(() => expense?.note || "");
+  const [merchant, setMerchant] = useState(expenseParties.merchant);
+  const [bank, setBank] = useState(expenseParties.bank);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [createdButUnconfirmed, setCreatedButUnconfirmed] = useState(false);
   const amountRef = useRef(null);
   const [year, monthNumber] = selectedMonthKey.split("-").map(Number);
   const minDate = `${selectedMonthKey}-01`;
@@ -51,6 +54,13 @@ function ExpenseSheet({
   function handleAmountChange(event) {
     const nextAmount = event.target.value;
     if (isAllowedAmountInput(nextAmount)) setAmount(nextAmount);
+  }
+
+  function toggleCredit() {
+    setAmount((current) =>
+      current.startsWith("-") ? current.slice(1) : `-${current}`,
+    );
+    amountRef.current?.focus();
   }
 
   useEffect(() => {
@@ -75,13 +85,15 @@ function ExpenseSheet({
       setError("Choose a category.");
       return;
     }
-    if (!date) {
-      setError("Pick a date.");
-      return;
-    }
-    if (date < minDate || date > maxDate) {
-      setError("Pick a date within the displayed month.");
-      return;
+    if (expenseId) {
+      if (!date) {
+        setError("Pick a date.");
+        return;
+      }
+      if (date < minDate || date > maxDate) {
+        setError("Pick a date within the displayed month.");
+        return;
+      }
     }
 
     setError("");
@@ -90,13 +102,14 @@ function ExpenseSheet({
       const values = {
         categoryId,
         amount: parsedAmount,
-        date,
-        note,
+        merchant: merchant.trim(),
+        bank: bank.trim(),
       };
       await runWithLoader(async () => {
         if (expenseId) {
           await updateExpense({
             ...values,
+            date,
             monthKey: selectedMonthKey,
             expenseId,
           });
@@ -106,6 +119,7 @@ function ExpenseSheet({
       });
       onClose();
     } catch (submitError) {
+      if (submitError.expenseCreated) setCreatedButUnconfirmed(true);
       setError(
         submitError.message || "Could not save this expense. Please try again.",
       );
@@ -135,17 +149,30 @@ function ExpenseSheet({
           Cancel
         </button>
         {expense ? "Edit expense" : "Add expense"}
-        <span className="sheet-spacer" />
+        <button className="link" type="submit" disabled={saving || createdButUnconfirmed}>
+          {createdButUnconfirmed ? "Submitted" : "Save"}
+        </button>
       </div>
-      <input
-        ref={amountRef}
-        className="amt"
-        inputMode="decimal"
-        placeholder="$0.00"
-        value={amount}
-        onChange={handleAmountChange}
-        aria-label="Amount"
-      />
+      <div className="expense-amount-entry">
+        <button
+          className={`expense-sign${amount.startsWith("-") ? " on" : ""}`}
+          type="button"
+          aria-label="Toggle credit (negative amount)"
+          aria-pressed={amount.startsWith("-")}
+          onClick={toggleCredit}
+        >
+          ±
+        </button>
+        <input
+          ref={amountRef}
+          className="amt"
+          inputMode="decimal"
+          placeholder="$0.00"
+          value={amount}
+          onChange={handleAmountChange}
+          aria-label="Amount"
+        />
+      </div>
       <div className="chips" aria-label="Expense category">
         {month.cats.map((category) => (
           <button
@@ -161,34 +188,45 @@ function ExpenseSheet({
           </button>
         ))}
       </div>
-      <input
-        className="f date-field"
-        type="date"
-        value={date}
-        min={minDate}
-        max={maxDate}
-        onChange={(event) => setDate(event.target.value)}
-        aria-label="Expense date"
-        disabled={Boolean(expense)}
-      />
       {expense && (
-        <div className="expense-field-help">
-          Date edits aren’t supported yet.
-        </div>
+        <>
+          <input
+            className="f date-field"
+            type="date"
+            value={date}
+            min={minDate}
+            max={maxDate}
+            onChange={(event) => setDate(event.target.value)}
+            aria-label="Expense date"
+            disabled
+          />
+          <div className="expense-field-help">Date edits aren’t supported yet.</div>
+        </>
       )}
       <input
         className="f"
-        placeholder="Note (optional)"
-        value={note}
-        onChange={(event) => setNote(event.target.value)}
-        aria-label="Note (optional)"
+        placeholder="Merchant (optional)"
+        autoComplete="off"
+        value={merchant}
+        onChange={(event) => setMerchant(event.target.value)}
+        aria-label="Merchant (optional)"
       />
+      <input
+        className="f"
+        placeholder="Bank (optional)"
+        autoComplete="off"
+        value={bank}
+        onChange={(event) => setBank(event.target.value)}
+        aria-label="Bank (optional)"
+      />
+      {!expense && (
+        <div className="expense-field-help">
+          The API assigns the expense date when it is saved.
+        </div>
+      )}
       <div className="err" role="alert">
-        {error || state.storageError || ""}
+        {error || (!createdButUnconfirmed ? state.storageError : "") || ""}
       </div>
-      <button className="save" type="submit" disabled={saving}>
-        {expense ? "Save changes" : "Save expense"}
-      </button>
     </form>
   );
 }

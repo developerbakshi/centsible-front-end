@@ -143,9 +143,8 @@ function App() {
               <button
                 className="expense-dock-add"
                 type="button"
-                disabled
-                aria-label="Add expense (disabled)"
-                title="Adding expenses is disabled"
+                aria-label="Add expense"
+                onClick={() => setActiveSheet({ type: "expense" })}
               >
                 + Add
               </button>
@@ -190,10 +189,17 @@ function App() {
                     setActiveSheet({
                       type: "expense",
                       preselectedCategoryId: categoryId,
+                      categoryId,
+                      expenseFromCategory: true,
                     })
                   }
                   onEdit={(expenseId) =>
-                    setActiveSheet({ type: "expense", expenseId })
+                    setActiveSheet({
+                      type: "expense",
+                      expenseId,
+                      categoryId: activeSheet.categoryId,
+                      expenseFromCategory: true,
+                    })
                   }
                 />
               )}
@@ -206,7 +212,12 @@ function App() {
                     setActiveSheet(
                       activeSheet.expenseFromAllExpenses
                         ? { type: "allExpenses" }
-                        : null,
+                        : activeSheet.expenseFromCategory
+                          ? {
+                              type: "category",
+                              categoryId: activeSheet.categoryId,
+                            }
+                          : null,
                     )
                   }
                 />

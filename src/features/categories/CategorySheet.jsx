@@ -153,14 +153,12 @@ function CategorySheet({ categoryId, onClose, onAdd, onEdit }) {
         </div>
       )}
       <div className="expense-action-help">
-        Adding and deleting expenses are temporarily unavailable.
+        Deleting expenses is temporarily unavailable.
       </div>
       <button
         className="save"
         type="button"
-        aria-label="Add expense (temporarily unavailable)"
-        title="Adding expenses is temporarily unavailable"
-        disabled
+        aria-label="Add expense"
         onClick={() => onAdd(categoryId)}
       >
         Add expense

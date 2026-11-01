@@ -2,6 +2,23 @@ import { monthKey, padDatePart } from "../../utils/date.js";
 
 const EXPENSES_URL = "https://api-centsible.vercel.app/expenses";
 
+export async function createExpense(expense) {
+  let response;
+  try {
+    response = await fetch(EXPENSES_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(expense),
+    });
+  } catch {
+    throw new Error("Could not connect to the expenses API.");
+  }
+
+  if (!response.ok) {
+    throw new Error(`The expense creation failed (${response.status}).`);
+  }
+}
+
 export async function updateExpense(expenseId, changes) {
   if (Object.keys(changes).length === 0) return;
 

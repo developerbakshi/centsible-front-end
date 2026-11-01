@@ -45,8 +45,13 @@ iPhone experience, not a desktop-responsive product.
 
 - A fixed bottom pill contains only **Add** and **All expenses** actions, matching
   the supplied HTML. There is no weekly entry point in the pill.
-- **Add** is visible but disabled. Adding expenses is not currently available
-  through the interface.
+- **Add** opens the expense form and creates expenses through `POST /expenses`.
+  The request sends the amount in dollars, the selected category name in
+  uppercase, and separate merchant and bank values. After creation, the app
+  reloads API data so the server-assigned date and ID are authoritative.
+- The add form does not show a date picker because the create API does not
+  accept a date; the API assigns it. The selected month switches to the
+  created expense's month after the refreshed record is found.
 - **All expenses** opens a tall scrolling sheet with expenses from the selected
   month only, sorted newest first by API `created_at`. The dock count uses that
   same selected-month expense set.
@@ -210,11 +215,12 @@ Other design conventions:
 - A month transition must preserve the rest of reducer state, especially
   `storageStatus`. Dropping it previously caused a blank screen.
 
-### Expense update mapping
+### Expense create and update mapping
 
-The UI’s note value is represented as `merchant · bank`. On edit:
+- Expense creation sends `amount`, uppercase category name, `merchant`, and
+  `bank` to `POST /expenses`. It does not send an expense date.
+- On edit, only changed API fields are sent.
 
-- Only changed API fields are sent.
 - Amount maps to `amount` in dollars.
 - Category ID maps to the category’s uppercase name in `category`.
 - A changed merchant or bank maps to only the changed `merchant` and/or `bank`
@@ -224,9 +230,8 @@ The UI’s note value is represented as `merchant · bank`. On edit:
 - On API success, the local in-memory month and localStorage snapshot are
   updated.
 
-The note convention is delimiter-based. If merchant or bank names contain the
-exact ` · ` delimiter, the split may be ambiguous; do not silently change this
-mapping without discussing its effect on the API contract and UI.
+The displayed note is derived from the merchant and bank values as
+`merchant · bank`; the edit form keeps them separate.
 
 ## Data sources, persistence, and API
 
@@ -244,7 +249,22 @@ Implemented endpoints:
 | --- | --- | --- |
 | `GET` | `/categories` | Load categories |
 | `GET` | `/expenses` | Load expenses |
+| `POST` | `/expenses` | Create an expense (amount, category, merchant, bank); API assigns the date |
 | `PUT` | `/expenses/{expense_id}` | Update changed expense fields |
+
+The create request body is:
+
+```json
+{
+  "amount": 72.99,
+  "category": "UTILITY",
+  "merchant": "APPLE",
+  "bank": "BOFA"
+}
+```
+
+The API assigns the new expense date; the client refreshes `GET /expenses` after
+creation to use the server's ID and date.
 
 Category response fields consumed by the app:
 
@@ -332,8 +352,8 @@ durable offline-first source of truth.
 Implications:
 
 - API expenses are loaded into device-local month buckets at startup/refresh.
-- Successful expense edits are sent to the API, then the local snapshot is
-  updated.
+- Successful expense additions and edits are sent to the API, then API data and
+  the local snapshot are refreshed.
 - A later API refresh can replace that local snapshot.
 - Budget and category settings currently use localStorage, but API startup
   rebuilds category/month data; local budget/category edits may therefore be
@@ -347,11 +367,12 @@ across devices without implementing and verifying those capabilities.
 
 ## Known limitations and open concerns
 
-- Add expense is disabled in the bottom dock and category sheet.
+- Expense creation is enabled in the bottom dock and category sheet.
+- The create API assigns expense dates; the add form does not offer a date
+  picker. Date changes on existing expenses remain unavailable.
 - Delete expense is disabled; no `DELETE /expenses/{id}` request is wired.
 - Add/delete category controls are disabled; no category write endpoints are
   wired.
-- Expense date editing is unavailable in the API and therefore disabled.
 - Settings persist locally only and can be overwritten by API initialization or
   refresh.
 - The native iOS date field has been difficult to size consistently. Current
@@ -415,7 +436,7 @@ src/
     categories/
       categoryService.js           Categories API access/normalization
     expenses/
-      expenseService.js            Expenses GET/PUT API access/normalization
+      expenseService.js            Expenses GET/POST/PUT API access/normalization
     storage/
       appDataService.js             localStorage snapshot and validation
   state/

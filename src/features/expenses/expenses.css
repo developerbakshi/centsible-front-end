@@ -53,13 +53,32 @@
   padding: 0 18px;
 }
 
-.sheet-spacer {
-  width: 60px;
-}
-
 .expense-form {
   width: 100%;
   min-width: 0;
+}
+
+.expense-amount-entry {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.expense-sign {
+  flex: 0 0 44px;
+  border: 0.5px solid var(--line);
+  border-radius: 22px;
+  background: var(--card);
+  color: var(--mute);
+  font-size: 22px;
+  font-weight: 300;
+}
+
+.expense-sign.on {
+  border-color: var(--acc);
+  background: var(--acc);
+  color: var(--bg);
 }
 
 .expense-form input.f {
@@ -71,6 +90,8 @@
 }
 
 .amt {
+  flex: 1;
+  min-width: 0;
   width: 100%;
   font-size: 64px;
   font-weight: 200;
@@ -86,10 +107,6 @@
 .expense-form input::placeholder {
   color: var(--mute);
   opacity: 1;
-}
-
-.expense-form input[aria-label="Note (optional)"] {
-  text-align: center;
 }
 
 input.f {

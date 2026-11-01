@@ -2,10 +2,6 @@ import { saveAppData } from "../../services/storage/appDataService.js";
 import { updateExpense as updateExpenseApi } from "../../services/expenses/expenseService.js";
 import { daysInMonth } from "../../utils/date.js";
 
-function createId() {
-  return Math.random().toString(36).slice(2, 9);
-}
-
 function isValidExpense(monthData, categoryId, amount, date, monthKey) {
   if (!Number.isFinite(amount) || amount === 0) {
     return false;
@@ -38,33 +34,9 @@ async function saveMonth(data, monthKey, month) {
   return updatedData;
 }
 
-export async function addExpense(
-  data,
-  { categoryId, amount, date, note },
-) {
-  const monthKey = date?.slice(0, 7);
-  const monthData = data.months[monthKey];
-
-  if (!monthData || !isValidExpense(monthData, categoryId, amount, date, monthKey)) {
-    throw new Error("Expense details are invalid for the selected month.");
-  }
-
-  const expense = {
-    id: createId(),
-    cat: categoryId,
-    amt: Math.round(amount * 100) / 100,
-    date,
-    note: note.trim(),
-  };
-  return saveMonth(data, monthKey, {
-    ...monthData,
-    exp: [...monthData.exp, expense],
-  });
-}
-
 export async function updateExpense(
   data,
-  { monthKey, expenseId, categoryId, amount, date, note },
+  { monthKey, expenseId, categoryId, amount, date, merchant, bank },
 ) {
   const monthData = data.months[monthKey];
   const expenseIndex = monthData?.exp.findIndex(({ id }) => id === expenseId);
@@ -91,16 +63,15 @@ export async function updateExpense(
     changes.category = category.name.toLocaleUpperCase("en-US");
   }
 
-  const normalizedNote = note.trim();
-  if (normalizedNote !== (originalExpense.note || "")) {
-    const [merchant = "", ...bankParts] = normalizedNote.split(" · ");
-    const bank = bankParts.join(" · ");
-    const originalMerchant = originalExpense.merchant ?? "";
-    const originalBank = originalExpense.bank ?? "";
+  const normalizedMerchant = merchant.trim();
+  const normalizedBank = bank.trim();
+  const originalMerchant = originalExpense.merchant ?? "";
+  const originalBank = originalExpense.bank ?? "";
 
-    if (merchant !== originalMerchant) changes.merchant = merchant;
-    if (bank !== originalBank) changes.bank = bank;
+  if (normalizedMerchant !== originalMerchant) {
+    changes.merchant = normalizedMerchant;
   }
+  if (normalizedBank !== originalBank) changes.bank = normalizedBank;
 
   await updateExpenseApi(expenseId, changes);
 
@@ -109,10 +80,10 @@ export async function updateExpense(
     ...expenses[expenseIndex],
     cat: categoryId,
     amt: Math.round(amount * 100) / 100,
-    merchant: changes.merchant ?? originalExpense.merchant ?? "",
-    bank: changes.bank ?? originalExpense.bank ?? "",
+    merchant: normalizedMerchant,
+    bank: normalizedBank,
     date: originalExpense.date,
-    note: normalizedNote,
+    note: [normalizedMerchant, normalizedBank].filter(Boolean).join(" · "),
   };
   return saveMonth(data, monthKey, { ...monthData, exp: expenses });
 }
