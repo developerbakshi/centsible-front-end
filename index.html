@@ -40,9 +40,68 @@
       href="/centsible-splash-1206x2622-dark.png"
       media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: dark)"
     />
+    <link
+      rel="preload"
+      as="image"
+      href="/centsible-splash-1206x2622-light.png"
+      media="(display-mode: standalone) and (prefers-color-scheme: light)"
+    />
+    <link
+      rel="preload"
+      as="image"
+      href="/centsible-splash-1206x2622-dark.png"
+      media="(display-mode: standalone) and (prefers-color-scheme: dark)"
+    />
+    <style>
+      #pwa-startup-screen {
+        display: none;
+      }
+
+      @media (display-mode: standalone) {
+        #pwa-startup-screen {
+          position: fixed;
+          z-index: 1000;
+          inset: 0;
+          display: block;
+          overflow: hidden;
+          background: #f3f6f2;
+        }
+
+        #pwa-startup-screen picture,
+        #pwa-startup-screen img {
+          display: block;
+          width: 100%;
+          height: 100%;
+        }
+
+        #pwa-startup-screen img {
+          object-fit: cover;
+        }
+      }
+
+      @media (display-mode: standalone) and (prefers-color-scheme: dark) {
+        #pwa-startup-screen {
+          background: #0b0f14;
+        }
+      }
+    </style>
     <title>Centsible</title>
   </head>
   <body>
+    <div id="pwa-startup-screen" role="status" aria-label="Loading Centsible">
+      <picture>
+        <source
+          srcset="/centsible-splash-1206x2622-dark.png"
+          media="(prefers-color-scheme: dark)"
+        />
+        <img
+          src="/centsible-splash-1206x2622-light.png"
+          alt=""
+          fetchpriority="high"
+          decoding="sync"
+        />
+      </picture>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

@@ -153,26 +153,15 @@ function ExpenseSheet({
           {createdButUnconfirmed ? "Submitted" : "Save"}
         </button>
       </div>
-      <div className="expense-amount-entry">
-        <button
-          className={`expense-sign${amount.startsWith("-") ? " on" : ""}`}
-          type="button"
-          aria-label="Toggle credit (negative amount)"
-          aria-pressed={amount.startsWith("-")}
-          onClick={toggleCredit}
-        >
-          ±
-        </button>
-        <input
-          ref={amountRef}
-          className="amt"
-          inputMode="decimal"
-          placeholder="$0.00"
-          value={amount}
-          onChange={handleAmountChange}
-          aria-label="Amount"
-        />
-      </div>
+      <input
+        ref={amountRef}
+        className="amt"
+        inputMode="decimal"
+        placeholder="$0.00"
+        value={amount}
+        onChange={handleAmountChange}
+        aria-label="Amount"
+      />
       <div className="chips" aria-label="Expense category">
         {month.cats.map((category) => (
           <button
@@ -188,42 +177,65 @@ function ExpenseSheet({
           </button>
         ))}
       </div>
-      {expense && (
-        <>
-          <input
-            className="f date-field"
-            type="date"
-            value={date}
-            min={minDate}
-            max={maxDate}
-            onChange={(event) => setDate(event.target.value)}
-            aria-label="Expense date"
-            disabled
-          />
-          <div className="expense-field-help">Date edits aren’t supported yet.</div>
-        </>
-      )}
-      <input
-        className="f"
-        placeholder="Merchant (optional)"
-        autoComplete="off"
-        value={merchant}
-        onChange={(event) => setMerchant(event.target.value)}
-        aria-label="Merchant (optional)"
-      />
-      <input
-        className="f"
-        placeholder="Bank (optional)"
-        autoComplete="off"
-        value={bank}
-        onChange={(event) => setBank(event.target.value)}
-        aria-label="Bank (optional)"
-      />
-      {!expense && (
-        <div className="expense-field-help">
-          The API assigns the expense date when it is saved.
+      <div className="expense-fields">
+        <div className="expense-row">
+          <label htmlFor="expense-date">Date</label>
+          {expense ? (
+            <input
+              id="expense-date"
+              type="date"
+              value={date}
+              min={minDate}
+              max={maxDate}
+              onChange={(event) => setDate(event.target.value)}
+              aria-label="Expense date"
+              disabled
+            />
+          ) : (
+            <span id="expense-date" className="expense-date-assigned">
+              Assigned when saved
+            </span>
+          )}
         </div>
-      )}
+        <div className="expense-row">
+          <label htmlFor="expense-merchant">Merchant</label>
+          <input
+            id="expense-merchant"
+            placeholder="Optional"
+            autoComplete="off"
+            value={merchant}
+            onChange={(event) => setMerchant(event.target.value)}
+            aria-label="Merchant (optional)"
+          />
+        </div>
+        <div className="expense-row">
+          <label htmlFor="expense-bank">Bank</label>
+          <input
+            id="expense-bank"
+            placeholder="Optional"
+            autoComplete="off"
+            value={bank}
+            onChange={(event) => setBank(event.target.value)}
+            aria-label="Bank (optional)"
+          />
+        </div>
+        <div className="expense-row">
+          <label htmlFor="expense-credit">Credit</label>
+          <button
+            id="expense-credit"
+            className="expense-credit-switch"
+            type="button"
+            role="switch"
+            aria-checked={amount.startsWith("-")}
+            onClick={toggleCredit}
+          />
+        </div>
+      </div>
+      <div className="expense-field-help">
+        {expense
+          ? "Date edits aren’t supported yet."
+          : "The API assigns the expense date when it is saved."}
+      </div>
       <div className="err" role="alert">
         {error || (!createdButUnconfirmed ? state.storageError : "") || ""}
       </div>

@@ -50,8 +50,9 @@ iPhone experience, not a desktop-responsive product.
   uppercase, and separate merchant and bank values. After creation, the app
   reloads API data so the server-assigned date and ID are authoritative.
 - The add form does not show a date picker because the create API does not
-  accept a date; the API assigns it. The selected month switches to the
-  created expense's month after the refreshed record is found.
+  accept a date; it shows that the API assigns the date. Merchant and bank use
+  the labeled input rows from the supplied HTML. The selected month switches
+  to the created expense's month after the refreshed record is found.
 - **All expenses** opens a tall scrolling sheet with expenses from the selected
   month only, sorted newest first by API `created_at`. The dock count uses that
   same selected-month expense set.
@@ -59,7 +60,9 @@ iPhone experience, not a desktop-responsive product.
   expense date, and—when the API date contains a time—the local time.
 - Selecting an expense opens the existing edit sheet. Cancel returns to the
   all-expenses list.
-- Category detail shows category spending, remaining budget, and the category’s
+- Category detail places its **+ Add** action on the top-left of the sheet
+  header, matching the supplied HTML. It shows category spending, remaining
+  budget, and the category’s
   weekly budget schedule and expenses. Weekly category allowances are allocated
   from the category's remaining budget across the remaining weeks. The current
   week's allowance is fixed at the start of that week; an overage reduces the
@@ -392,8 +395,9 @@ across devices without implementing and verifying those capabilities.
   Installation on iPhone is through Safari's Share menu → Add to Home Screen.
 - The iPhone 17 Pro PWA uses the supplied 1206 × 2622 launch images in light or
   dark mode according to the system appearance. iOS Home Screen launch screens
-  use the matching Apple startup-image link; the in-app startup overlay shows
-  the same image while the initial API data loads. Browser loads and later
+  use the matching Apple startup-image link. Installed standalone launches show
+  the matching image from static HTML before React starts, then keep it visible
+  until the initial API data load completes. Browser loads and later
   refresh/operation loaders retain the ripple overlay.
 
 ## Project structure

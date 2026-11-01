@@ -7,6 +7,34 @@
   margin-top: 0;
 }
 
+.category-sheet-header {
+  display: grid;
+  grid-template-columns: minmax(70px, 1fr) auto minmax(70px, 1fr);
+  gap: 8px;
+}
+
+.category-sheet-header .link {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.category-sheet-header > :first-child {
+  justify-self: start;
+  min-width: 70px;
+  text-align: left;
+}
+
+.category-sheet-title {
+  min-width: 0;
+  text-align: center;
+}
+
+.category-sheet-header > :last-child {
+  justify-self: end;
+  min-width: 70px;
+  text-align: right;
+}
+
 .category-weekly {
   margin: 16px 0 0;
 }

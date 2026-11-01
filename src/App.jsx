@@ -35,6 +35,11 @@ function App() {
   const isPwaStartup = isLoading && isStandaloneApp();
 
   useEffect(() => {
+    if (state.storageStatus === "loading") return;
+    document.getElementById("pwa-startup-screen")?.remove();
+  }, [state.storageStatus]);
+
+  useEffect(() => {
     const refreshOnForeground = () => {
       if (
         document.visibilityState !== "visible" ||
@@ -229,7 +234,7 @@ function App() {
           </>
         ) : null}
       </div>
-      {isBlocking && <LoadingOverlay splash={isPwaStartup} />}
+      {isBlocking && !isPwaStartup && <LoadingOverlay />}
     </div>
   );
 }

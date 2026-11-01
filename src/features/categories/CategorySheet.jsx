@@ -62,8 +62,11 @@ function CategorySheet({ categoryId, onClose, onAdd, onEdit }) {
 
   return (
     <div className="category-sheet">
-      <div className="sh-h">
-        <span>
+      <div className="sh-h category-sheet-header">
+        <button className="link" type="button" onClick={() => onAdd(categoryId)}>
+          + Add
+        </button>
+        <span className="category-sheet-title">
           {category.emoji} {formatCategoryName(category.name)}
         </span>
         <button className="link" type="button" onClick={onClose}>
@@ -155,14 +158,6 @@ function CategorySheet({ categoryId, onClose, onAdd, onEdit }) {
       <div className="expense-action-help">
         Deleting expenses is temporarily unavailable.
       </div>
-      <button
-        className="save"
-        type="button"
-        aria-label="Add expense"
-        onClick={() => onAdd(categoryId)}
-      >
-        Add expense
-      </button>
     </div>
   );
 }
