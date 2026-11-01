@@ -224,6 +224,77 @@ input.f {
   font-size: 12px;
 }
 
+.expense-delete-cta {
+  display: block;
+  width: 100%;
+  min-height: 56px;
+  margin-top: 12px;
+  border-radius: 14px;
+  background: var(--card);
+  color: var(--bad);
+  font-weight: 600;
+}
+
+.swipe-expense {
+  position: relative;
+  overflow: hidden;
+  border-bottom: 0.5px solid var(--line);
+  background: var(--card);
+}
+
+.swipe-expense:last-child {
+  border-bottom: 0;
+}
+
+.swipe-expense-main {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  min-height: 56px;
+  padding: 12px 16px;
+  background: var(--card);
+  text-align: left;
+  touch-action: pan-y;
+}
+
+.swipe-expense-delete {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 88px;
+  min-height: 56px;
+  background: var(--bad);
+  color: #fff;
+  font-weight: 600;
+}
+
+.expense-toast {
+  position: fixed;
+  z-index: 7;
+  bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: calc(100vw - 24px);
+  padding: 0 6px 0 18px;
+  transform: translateX(-50%);
+  border-radius: 22px;
+  background: var(--ink);
+  color: var(--bg);
+  font-size: 15px;
+  white-space: nowrap;
+}
+
+.expense-toast button {
+  padding: 0 12px;
+  color: var(--bg);
+  font-weight: 700;
+  text-decoration: underline;
+}
+
 .sheet.sheet-all-expenses {
   display: flex;
   flex-direction: column;
@@ -245,14 +316,16 @@ input.f {
   overscroll-behavior: contain;
 }
 
-.all-expense-row {
-  display: block;
-  width: 100%;
-  min-width: 0;
-  padding: 14px 0;
-  color: var(--ink);
-  text-align: left;
+.all-expenses-list .swipe-expense {
   border-top: 1px solid var(--line);
+}
+
+.all-expenses-list .swipe-expense-main {
+  padding: 14px 0;
+}
+
+.all-expense-content {
+  display: block;
 }
 
 .all-expense-main,
@@ -273,7 +346,7 @@ input.f {
   min-width: 0;
 }
 
-.all-expense-row:active {
+.swipe-expense-main:active {
   opacity: 0.7;
 }
 

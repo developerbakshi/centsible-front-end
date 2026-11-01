@@ -19,6 +19,7 @@ function isAllowedAmountInput(value) {
 
 function ExpenseSheet({
   onClose,
+  onRequestDelete,
   preselectedCategoryId = null,
   expenseId = null,
   expenseMonthKey = null,
@@ -236,6 +237,15 @@ function ExpenseSheet({
           ? "Date edits aren’t supported yet."
           : "The API assigns the expense date when it is saved."}
       </div>
+      {expense && (
+        <button
+          className="expense-delete-cta"
+          type="button"
+          onClick={() => onRequestDelete(expense, selectedMonthKey)}
+        >
+          Delete expense
+        </button>
+      )}
       <div className="err" role="alert">
         {error || (!createdButUnconfirmed ? state.storageError : "") || ""}
       </div>

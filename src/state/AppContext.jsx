@@ -237,8 +237,15 @@ export function AppProvider({ children }) {
     [runExpenseOperation],
   );
   const deleteExpense = useCallback(
-    (expense) => runExpenseOperation(deleteExpenseService, expense),
-    [runExpenseOperation],
+    async (expense) => {
+      if (state.storageStatus === "load-error") {
+        throw new Error("Saved expenses could not be loaded.");
+      }
+
+      const data = await deleteExpenseService(state.data, expense);
+      dispatch({ type: "data/replace", data });
+    },
+    [dispatch, state.data, state.storageStatus],
   );
   const runSettingsOperation = useCallback(
     (operation, payload, reset = false) => {

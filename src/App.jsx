@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import DeleteConfirmation from "./components/ui/DeleteConfirmation.jsx";
 import LoadingOverlay from "./components/ui/LoadingOverlay.jsx";
 import BottomSheet from "./components/ui/BottomSheet.jsx";
 import CategorySheet from "./features/categories/CategorySheet.jsx";
@@ -18,12 +19,17 @@ function isStandaloneApp() {
 function App() {
   const {
     state,
+    addExpense,
+    deleteExpense,
     isRefreshing,
     refreshData,
     refreshError,
     isOperationLoading,
+    runWithLoader,
   } = useAppState();
   const [activeSheet, setActiveSheet] = useState(null);
+  const [deleteConfirmation, setDeleteConfirmation] = useState(null);
+  const [expenseToast, setExpenseToast] = useState(null);
   const [pullDistance, setPullDistance] = useState(0);
   const pullStartRef = useRef(null);
   const lastAutomaticRefreshRef = useRef(0);
@@ -33,6 +39,12 @@ function App() {
   const isLoading = state.storageStatus === "loading";
   const isBlocking = isLoading || isRefreshing || isOperationLoading;
   const isPwaStartup = isLoading && isStandaloneApp();
+
+  useEffect(() => {
+    if (!expenseToast) return undefined;
+    const timeout = window.setTimeout(() => setExpenseToast(null), 5000);
+    return () => window.clearTimeout(timeout);
+  }, [expenseToast]);
 
   useEffect(() => {
     if (state.storageStatus === "loading") return;
@@ -112,6 +124,70 @@ function App() {
     }
   }
 
+  function requestExpenseDelete(expense, monthKey) {
+    setDeleteConfirmation({ expense, monthKey, error: "" });
+  }
+
+  async function confirmExpenseDelete() {
+    if (!deleteConfirmation) return;
+    const target = deleteConfirmation;
+
+    try {
+      await runWithLoader(() =>
+        deleteExpense({
+          monthKey: target.monthKey,
+          expenseId: target.expense.id,
+        }),
+      );
+      setDeleteConfirmation(null);
+      setExpenseToast({
+        type: "deleted",
+        expense: target.expense,
+        monthKey: target.monthKey,
+      });
+      if (activeSheet?.type === "expense") {
+        setActiveSheet(
+          activeSheet.expenseFromAllExpenses
+            ? { type: "allExpenses" }
+            : activeSheet.expenseFromCategory
+              ? { type: "category", categoryId: activeSheet.categoryId }
+              : null,
+        );
+      }
+    } catch (error) {
+      setDeleteConfirmation({
+        ...target,
+        error:
+          error.message || "Could not delete this expense. Please try again.",
+      });
+    }
+  }
+
+  async function undoExpenseDelete() {
+    if (expenseToast?.type !== "deleted") return;
+    const { expense } = expenseToast;
+    setExpenseToast(null);
+
+    try {
+      await runWithLoader(() =>
+        addExpense({
+          categoryId: expense.cat,
+          amount: expense.amt,
+          merchant: expense.merchant ?? "",
+          bank: expense.bank ?? "",
+        }),
+      );
+      setExpenseToast({ type: "notice", message: "Expense restored." });
+    } catch (error) {
+      setExpenseToast({
+        type: "notice",
+        message: error.expenseCreated
+          ? "The expense may have been restored. Refresh before trying again."
+          : "Could not restore the expense. Please try again.",
+      });
+    }
+  }
+
   return (
     <div
       id="app"
@@ -176,6 +252,7 @@ function App() {
               {activeSheet?.type === "allExpenses" && (
                 <AllExpensesSheet
                   onClose={() => setActiveSheet(null)}
+                  onRequestDelete={requestExpenseDelete}
                   onEdit={(expenseId, expenseMonthKey) =>
                     setActiveSheet({
                       type: "expense",
@@ -190,6 +267,7 @@ function App() {
                 <CategorySheet
                   categoryId={activeSheet.categoryId}
                   onClose={() => setActiveSheet(null)}
+                  onRequestDelete={requestExpenseDelete}
                   onAdd={(categoryId) =>
                     setActiveSheet({
                       type: "expense",
@@ -213,6 +291,7 @@ function App() {
                   expenseId={activeSheet.expenseId}
                   expenseMonthKey={activeSheet.expenseMonthKey}
                   preselectedCategoryId={activeSheet.preselectedCategoryId}
+                  onRequestDelete={requestExpenseDelete}
                   onClose={() =>
                     setActiveSheet(
                       activeSheet.expenseFromAllExpenses
@@ -234,6 +313,26 @@ function App() {
           </>
         ) : null}
       </div>
+      <DeleteConfirmation
+        target={deleteConfirmation}
+        pending={isOperationLoading}
+        onCancel={() => setDeleteConfirmation(null)}
+        onConfirm={confirmExpenseDelete}
+      />
+      {expenseToast && (
+        <div className="expense-toast" role="status" aria-live="polite">
+          <span>
+            {expenseToast.type === "deleted"
+              ? "Expense deleted"
+              : expenseToast.message}
+          </span>
+          {expenseToast.type === "deleted" && (
+            <button type="button" onClick={undoExpenseDelete}>
+              Undo
+            </button>
+          )}
+        </div>
+      )}
       {isBlocking && !isPwaStartup && <LoadingOverlay />}
     </div>
   );

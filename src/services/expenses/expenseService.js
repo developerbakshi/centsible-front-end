@@ -41,6 +41,22 @@ export async function updateExpense(expenseId, changes) {
   }
 }
 
+export async function deleteExpense(expenseId) {
+  let response;
+  try {
+    response = await fetch(
+      `${EXPENSES_URL}/${encodeURIComponent(expenseId)}`,
+      { method: "DELETE" },
+    );
+  } catch {
+    throw new Error("Could not connect to the expenses API.");
+  }
+
+  if (!response.ok) {
+    throw new Error(`The expense deletion failed (${response.status}).`);
+  }
+}
+
 function normalizeExpense(expense) {
   if (
     expense === null ||

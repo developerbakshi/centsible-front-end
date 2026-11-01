@@ -7,6 +7,7 @@ import {
 import { formatCategoryName } from "../../utils/category.js";
 import { formatDateDDMMYYYY } from "../../utils/date.js";
 import { calculateCategoryWeeks } from "../week/weekCalculations.js";
+import SwipeableExpenseRow from "../expenses/SwipeableExpenseRow.jsx";
 import "./categories.css";
 
 function formatWeekRange(monthKey, week) {
@@ -18,9 +19,9 @@ function formatWeekRange(monthKey, week) {
     : `${monthLabel} ${week.startDay}–${week.endDay}`;
 }
 
-function CategorySheet({ categoryId, onClose, onAdd, onEdit }) {
-  const { state, deleteExpense } = useAppState();
-  const [error, setError] = useState("");
+function CategorySheet({ categoryId, onClose, onAdd, onEdit, onRequestDelete }) {
+  const { state } = useAppState();
+  const [openExpenseId, setOpenExpenseId] = useState(null);
   const month = state.data.months[state.currentMonth];
   const category = month.cats.find((item) => item.id === categoryId);
 
@@ -47,18 +48,6 @@ function CategorySheet({ categoryId, onClose, onAdd, onEdit }) {
     category,
     expenses: month.exp,
   });
-
-  async function handleDelete(expense) {
-    setError("");
-    try {
-      await deleteExpense({
-        monthKey: state.currentMonth,
-        expenseId: expense.id,
-      });
-    } catch {
-      setError("Could not delete this expense. Please try again.");
-    }
-  }
 
   return (
     <div className="category-sheet">
@@ -122,41 +111,27 @@ function CategorySheet({ categoryId, onClose, onAdd, onEdit }) {
       <div className="card expense-list">
         {expenses.length ? (
           expenses.map((expense) => (
-            <div className="exp" key={expense.id}>
-              <button
-                className="m"
-                type="button"
-                onClick={() => onEdit(expense.id)}
-              >
+            <SwipeableExpenseRow
+              key={expense.id}
+              expense={expense}
+              monthKey={state.currentMonth}
+              isOpen={openExpenseId === expense.id}
+              onOpenChange={setOpenExpenseId}
+              onEdit={(expenseId) => onEdit(expenseId)}
+              onRequestDelete={onRequestDelete}
+            >
+              <span className="category-expense-content">
                 <b>{formatCurrencyWithCents(expense.amt)}</b>
                 <small>
                   {formatDateDDMMYYYY(expense.date)}
                   {expense.note ? ` · ${expense.note}` : ""}
                 </small>
-              </button>
-              <button
-                className="x"
-                type="button"
-                aria-label="Delete expense (temporarily unavailable)"
-                title="Deleting expenses is temporarily unavailable"
-                disabled
-                onClick={() => handleDelete(expense)}
-              >
-                🗑
-              </button>
-            </div>
+              </span>
+            </SwipeableExpenseRow>
           ))
         ) : (
           <div className="empty">No expenses in this category yet.</div>
         )}
-      </div>
-      {error && (
-        <div className="err" role="alert">
-          {error}
-        </div>
-      )}
-      <div className="expense-action-help">
-        Deleting expenses is temporarily unavailable.
       </div>
     </div>
   );

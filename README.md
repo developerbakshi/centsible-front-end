@@ -69,8 +69,13 @@ iPhone experience, not a desktop-responsive product.
   pool split across future weeks. Selecting an expense opens the same edit sheet.
 - Expense date is read-only in the edit sheet because the update API does not
   support editing dates.
-- Expense delete controls remain visible but disabled. The frontend has local
-  delete logic, but there is no wired delete API request.
+- Expenses can be deleted from either expense list by swiping a row left to
+  reveal **Delete**, or from the edit sheet using **Delete expense**. Both
+  actions show a confirmation before calling `DELETE /expenses/{id}`.
+- A successful delete shows a five-second **Undo** action. The API has no
+  restore endpoint, so Undo recreates the expense through `POST /expenses`:
+  it retains the amount, category, merchant, and bank, but receives a new ID
+  and the API-assigned date.
 
 ### Budget and category settings
 
@@ -373,7 +378,8 @@ across devices without implementing and verifying those capabilities.
 - Expense creation is enabled in the bottom dock and category sheet.
 - The create API assigns expense dates; the add form does not offer a date
   picker. Date changes on existing expenses remain unavailable.
-- Delete expense is disabled; no `DELETE /expenses/{id}` request is wired.
+- Expense deletion is enabled through the API. Undo recreates the expense with
+  a new ID and API-assigned date because the API does not provide restoration.
 - Add/delete category controls are disabled; no category write endpoints are
   wired.
 - Settings persist locally only and can be overwritten by API initialization or

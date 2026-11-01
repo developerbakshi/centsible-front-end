@@ -1,5 +1,8 @@
 import { saveAppData } from "../../services/storage/appDataService.js";
-import { updateExpense as updateExpenseApi } from "../../services/expenses/expenseService.js";
+import {
+  deleteExpense as deleteExpenseApi,
+  updateExpense as updateExpenseApi,
+} from "../../services/expenses/expenseService.js";
 import { daysInMonth } from "../../utils/date.js";
 
 function isValidExpense(monthData, categoryId, amount, date, monthKey) {
@@ -94,6 +97,7 @@ export async function deleteExpense(data, { monthKey, expenseId }) {
     throw new Error("Expense is no longer available.");
   }
 
+  await deleteExpenseApi(expenseId);
   const expenses = monthData.exp.filter(({ id }) => id !== expenseId);
   return saveMonth(data, monthKey, { ...monthData, exp: expenses });
 }

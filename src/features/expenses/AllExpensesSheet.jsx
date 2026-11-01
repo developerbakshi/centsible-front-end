@@ -1,25 +1,28 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useAppState } from "../../state/AppContext.jsx";
 import { formatCategoryName } from "../../utils/category.js";
 import { formatCurrencyWithCents } from "../../utils/currency.js";
 import { formatDateDDMMYYYY } from "../../utils/date.js";
+import SwipeableExpenseRow from "./SwipeableExpenseRow.jsx";
 import "./expenses.css";
 
-function AllExpensesSheet({ onClose, onEdit }) {
+function AllExpensesSheet({ onClose, onEdit, onRequestDelete }) {
   const { state } = useAppState();
+  const [openExpenseId, setOpenExpenseId] = useState(null);
   const selectedMonth = state.data.months[state.currentMonth];
   const expenses = useMemo(
-    () => selectedMonth.exp
-      .map((expense) => ({
-        ...expense,
-        monthKey: state.currentMonth,
-        category: selectedMonth.cats.find(({ id }) => id === expense.cat),
-      }))
-      .sort(
-        (first, second) =>
-          new Date(second.createdAt).getTime() -
-          new Date(first.createdAt).getTime(),
-      ),
+    () =>
+      selectedMonth.exp
+        .map((expense) => ({
+          ...expense,
+          monthKey: state.currentMonth,
+          category: selectedMonth.cats.find(({ id }) => id === expense.cat),
+        }))
+        .sort(
+          (first, second) =>
+            new Date(second.createdAt).getTime() -
+            new Date(first.createdAt).getTime(),
+        ),
     [selectedMonth, state.currentMonth],
   );
 
@@ -34,56 +37,66 @@ function AllExpensesSheet({ onClose, onEdit }) {
       <div className="all-expenses-list">
         {expenses.length ? (
           expenses.map((expense) => (
-            <button
-              className="all-expense-row"
-              type="button"
+            <SwipeableExpenseRow
               key={`${expense.monthKey}-${expense.id}`}
-              aria-label={`Edit ${expense.merchant || expense.note || "expense"}, ${formatCurrencyWithCents(expense.amt)}`}
-              onClick={() => onEdit(expense.id, expense.monthKey)}
+              expense={expense}
+              monthKey={expense.monthKey}
+              isOpen={openExpenseId === expense.id}
+              onOpenChange={setOpenExpenseId}
+              onEdit={onEdit}
+              onRequestDelete={onRequestDelete}
             >
-              <span className="all-expense-main">
-                <span className="all-expense-merchant">
-                  {expense.merchant || expense.note || "Expense"}
-                </span>
-                <b>{formatCurrencyWithCents(expense.amt)}</b>
-              </span>
-              <span className="all-expense-meta">
-                <span className="all-expense-category">
-                  {expense.category && (
-                    <span
-                      className="all-expense-category-icon"
-                      aria-hidden="true"
-                    >
-                      {expense.category.emoji}
-                    </span>
-                  )}
-                  <span className="all-expense-category-name">
-                    {expense.category
-                      ? formatCategoryName(expense.category.name)
-                      : "Category unavailable"}
+              <span className="all-expense-content">
+                <span className="all-expense-main">
+                  <span className="all-expense-merchant">
+                    {expense.merchant || expense.note || "Expense"}
                   </span>
+                  <b>{formatCurrencyWithCents(expense.amt)}</b>
                 </span>
-                {expense.bank && (
-                  <>
-                    <span className="all-expense-bank">{expense.bank}</span>
-                    <span className="all-expense-separator" aria-hidden="true">
-                      ·
+                <span className="all-expense-meta">
+                  <span className="all-expense-category">
+                    {expense.category && (
+                      <span
+                        className="all-expense-category-icon"
+                        aria-hidden="true"
+                      >
+                        {expense.category.emoji}
+                      </span>
+                    )}
+                    <span className="all-expense-category-name">
+                      {expense.category
+                        ? formatCategoryName(expense.category.name)
+                        : "Category unavailable"}
                     </span>
-                  </>
-                )}
-                <span className="all-expense-date">
-                  {formatDateDDMMYYYY(expense.date)}
+                  </span>
+                  {expense.bank && (
+                    <>
+                      <span className="all-expense-bank">{expense.bank}</span>
+                      <span
+                        className="all-expense-separator"
+                        aria-hidden="true"
+                      >
+                        ·
+                      </span>
+                    </>
+                  )}
+                  <span className="all-expense-date">
+                    {formatDateDDMMYYYY(expense.date)}
+                  </span>
+                  {expense.time && (
+                    <>
+                      <span
+                        className="all-expense-separator"
+                        aria-hidden="true"
+                      >
+                        ·
+                      </span>
+                      <span className="all-expense-time">{expense.time}</span>
+                    </>
+                  )}
                 </span>
-                {expense.time && (
-                  <>
-                    <span className="all-expense-separator" aria-hidden="true">
-                      ·
-                    </span>
-                    <span className="all-expense-time">{expense.time}</span>
-                  </>
-                )}
               </span>
-            </button>
+            </SwipeableExpenseRow>
           ))
         ) : (
           <div className="empty">No expenses yet.</div>
