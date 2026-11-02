@@ -52,6 +52,15 @@ function App() {
   }, [state.storageStatus]);
 
   useEffect(() => {
+    const resetToHome = () => {
+      setActiveSheet(null);
+      setDeleteConfirmation(null);
+      setExpenseToast(null);
+      setPullDistance(0);
+      appRef.current?.scrollTo(0, 0);
+      window.scrollTo(0, 0);
+    };
+
     const refreshOnForeground = () => {
       if (
         document.visibilityState !== "visible" ||
@@ -64,15 +73,23 @@ function App() {
       lastAutomaticRefreshRef.current = Date.now();
       refreshData().catch(() => {});
     };
+    const handleVisibilityChange = () => {
+      if (document.visibilityState !== "visible") return;
+      resetToHome();
+      refreshOnForeground();
+    };
     const refreshFromPageShow = (event) => {
-      if (event.persisted) refreshOnForeground();
+      if (event.persisted) {
+        resetToHome();
+        refreshOnForeground();
+      }
     };
 
-    document.addEventListener("visibilitychange", refreshOnForeground);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
     window.addEventListener("focus", refreshOnForeground);
     window.addEventListener("pageshow", refreshFromPageShow);
     return () => {
-      document.removeEventListener("visibilitychange", refreshOnForeground);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("focus", refreshOnForeground);
       window.removeEventListener("pageshow", refreshFromPageShow);
     };

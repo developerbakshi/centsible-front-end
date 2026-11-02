@@ -97,7 +97,10 @@ iPhone experience, not a desktop-responsive product.
   refresh.
 - The app refreshes when the document becomes visible or the window receives
   focus, with a 15-second throttle. A `pageshow` event triggers the same refresh
-  when the page is restored from the back-forward cache.
+  when the page is restored from the back-forward cache. When the PWA returns
+  to the foreground or is restored from the back-forward cache, it closes any
+  open sheet/dialog and resets the overview scroll position to the top. Expense
+  and budget data remain saved.
 - Category detail, expense editor, settings, and all-expenses views are bottom
   sheets managed by app-level React state. There is no router.
 
