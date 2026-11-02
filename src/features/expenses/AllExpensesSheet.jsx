@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import { useAppState } from "../../state/AppContext.jsx";
 import { formatCategoryName } from "../../utils/category.js";
 import { formatCurrencyWithCents } from "../../utils/currency.js";
-import { formatDateDDMMYYYY } from "../../utils/date.js";
+import { formatExpenseDateLabel } from "../../utils/date.js";
 import SwipeableExpenseRow from "./SwipeableExpenseRow.jsx";
 import "./expenses.css";
 
@@ -18,17 +18,14 @@ function AllExpensesSheet({ onClose, onEdit, onRequestDelete }) {
           monthKey: state.currentMonth,
           category: selectedMonth.cats.find(({ id }) => id === expense.cat),
         }))
-        .sort(
-          (first, second) =>
-            new Date(second.createdAt).getTime() -
-            new Date(first.createdAt).getTime(),
-        ),
+        .sort((first, second) => Number(second.id) - Number(first.id)),
     [selectedMonth, state.currentMonth],
   );
 
   return (
     <div className="all-expenses-sheet">
-      <div className="sh-h">
+      <div className="all-expenses-header">
+        <span aria-hidden="true" />
         <span>All expenses · {expenses.length}</span>
         <button className="link" type="button" onClick={onClose}>
           Done
@@ -64,11 +61,18 @@ function AllExpensesSheet({ onClose, onEdit, onRequestDelete }) {
                       </span>
                     )}
                     <span className="all-expense-category-name">
-                      {expense.category
-                        ? formatCategoryName(expense.category.name)
-                        : "Category unavailable"}
+                      {expense.category &&
+                        formatCategoryName(expense.category.name)}
                     </span>
                   </span>
+                  {expense.category && (
+                    <span
+                      className="all-expense-separator"
+                      aria-hidden="true"
+                    >
+                      ·
+                    </span>
+                  )}
                   {expense.bank && (
                     <>
                       <span className="all-expense-bank">{expense.bank}</span>
@@ -81,7 +85,7 @@ function AllExpensesSheet({ onClose, onEdit, onRequestDelete }) {
                     </>
                   )}
                   <span className="all-expense-date">
-                    {formatDateDDMMYYYY(expense.date)}
+                    {formatExpenseDateLabel(expense.date)}
                   </span>
                   {expense.time && (
                     <>

@@ -54,10 +54,13 @@ iPhone experience, not a desktop-responsive product.
   the labeled input rows from the supplied HTML. The selected month switches
   to the created expense's month after the refreshed record is found.
 - **All expenses** opens a tall scrolling sheet with expenses from the selected
-  month only, sorted newest first by API `created_at`. The dock count uses that
-  same selected-month expense set.
-- An all-expenses row shows merchant, amount, category emoji and name, bank,
-  expense date, and—when the API date contains a time—the local time.
+  month only, sorted by descending API ID to match the supplied HTML. Its
+  centered header and rounded grouped list also follow the reference layout.
+- An all-expenses row shows merchant and amount, followed by inline category
+  emoji/name, bank, and date metadata. Dates display as **Today** or
+  **Yesterday** when applicable, otherwise as a localized short date; API time
+  is appended when available. The dock count uses that same selected-month
+  expense set.
 - Selecting an expense opens the existing edit sheet. Cancel returns to the
   all-expenses list.
 - Category detail places its **+ Add** action on the top-left of the sheet

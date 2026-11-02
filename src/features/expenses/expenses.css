@@ -252,6 +252,7 @@ input.f {
 
 .swipe-expense {
   position: relative;
+  isolation: isolate;
   overflow: hidden;
   border-bottom: 0.5px solid var(--line);
   background: var(--card);
@@ -271,10 +272,15 @@ input.f {
   background: var(--card);
   text-align: left;
   touch-action: pan-y;
+  backface-visibility: hidden;
+  transition:
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .swipe-expense-delete {
   position: absolute;
+  z-index: 0;
   top: 0;
   right: 0;
   bottom: 0;
@@ -316,6 +322,11 @@ input.f {
   height: 92dvh;
   max-height: 92dvh;
   overflow: hidden;
+  padding-top: 0;
+}
+
+.sheet-all-expenses > .grab {
+  margin-bottom: 0;
 }
 
 .all-expenses-sheet {
@@ -323,20 +334,37 @@ input.f {
   flex: 1;
   flex-direction: column;
   min-height: 0;
-}
-
-.all-expenses-list {
-  min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
 }
 
-.all-expenses-list .swipe-expense {
-  border-top: 1px solid var(--line);
+.all-expenses-header {
+  display: grid;
+  flex: 0 0 auto;
+  grid-template-columns: minmax(70px, 1fr) auto minmax(70px, 1fr);
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0 8px;
+  font-size: 17px;
+  font-weight: 600;
+  touch-action: none;
 }
 
-.all-expenses-list .swipe-expense-main {
-  padding: 14px 0;
+.all-expenses-header > :last-child {
+  justify-self: end;
+  min-width: 70px;
+  text-align: right;
+}
+
+.all-expenses-list {
+  flex: 0 0 auto;
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--card);
+}
+
+.all-expenses-list .swipe-expense {
+  border-top: 0;
 }
 
 .all-expense-content {
@@ -345,29 +373,28 @@ input.f {
 
 .all-expense-main,
 .all-expense-meta {
-  display: flex;
   width: 100%;
-  align-items: baseline;
-  gap: 12px;
-}
-
-.all-expense-main {
-  justify-content: space-between;
-}
-
-.all-expense-meta {
-  align-items: center;
-  gap: 8px;
   min-width: 0;
 }
 
+.all-expense-main {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.all-expense-meta {
+  display: block;
+}
+
 .swipe-expense-main:active {
-  opacity: 0.7;
+  opacity: 1;
 }
 
 .all-expense-merchant {
   overflow: hidden;
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -375,61 +402,28 @@ input.f {
 
 .all-expense-main b {
   flex: 0 0 auto;
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 600;
 }
 
 .all-expense-meta {
-  margin-top: 4px;
+  margin-top: 3px;
   color: var(--mute);
   font-size: 12px;
 }
 
-.all-expense-bank,
-.all-expense-date,
-.all-expense-time,
 .all-expense-separator {
-  color: var(--mute);
-  font-size: 12px;
-}
-
-.all-expense-category {
-  display: flex;
-  flex: 1 1 auto;
-  align-items: center;
-  gap: 5px;
-  min-width: 0;
+  margin: 0 3px;
 }
 
 .all-expense-category-icon {
   font-size: 13px;
 }
 
-.all-expense-category-name {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .all-expense-bank {
-  flex: 0 0 auto;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.all-expense-separator {
-  flex: 0 0 auto;
-  margin: 0 -4px;
-}
-
-.all-expense-date {
-  flex: 0 0 auto;
-  text-align: right;
-}
-
-.all-expense-time {
-  flex: 0 0 auto;
 }
 
 .chips {

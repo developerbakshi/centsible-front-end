@@ -41,6 +41,26 @@ export function formatDateDDMMYYYY(value) {
   return `${day}-${month}-${year}`;
 }
 
+export function formatExpenseDateLabel(value, today = new Date()) {
+  const [year, month, day] = value.split("-").map(Number);
+  const expenseDate = new Date(year, month - 1, day);
+  const todayDate = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate(),
+  );
+  const daysAgo = Math.round((todayDate - expenseDate) / 86_400_000);
+
+  if (daysAgo === 0) return "Today";
+  if (daysAgo === 1) return "Yesterday";
+
+  return expenseDate.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
 export function shiftMonth(key, amount) {
   const [year, month] = key.split("-").map(Number);
   const date = new Date(year, month - 1 + amount, 1);

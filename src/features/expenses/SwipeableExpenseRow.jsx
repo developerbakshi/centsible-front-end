@@ -17,12 +17,18 @@ function SwipeableExpenseRow({
   children,
 }) {
   const touchRef = useRef(null);
+  const animationFrameRef = useRef(null);
   const suppressClickRef = useRef(false);
   const [dragOffset, setDragOffset] = useState(null);
 
   function handleTouchStart(event) {
     if (event.touches.length !== 1) {
       touchRef.current = null;
+      if (animationFrameRef.current !== null) {
+        window.cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+      setDragOffset(null);
       return;
     }
 
@@ -50,13 +56,24 @@ function SwipeableExpenseRow({
     }
     if (touch.dragging) {
       touch.currentOffset = clampOffset(touch.offset + deltaX);
-      setDragOffset(touch.currentOffset);
+      if (animationFrameRef.current === null) {
+        animationFrameRef.current = window.requestAnimationFrame(() => {
+          animationFrameRef.current = null;
+          if (touchRef.current?.dragging) {
+            setDragOffset(touchRef.current.currentOffset);
+          }
+        });
+      }
     }
   }
 
   function handleTouchEnd() {
     const touch = touchRef.current;
     touchRef.current = null;
+    if (animationFrameRef.current !== null) {
+      window.cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
     if (!touch?.dragging) return;
 
     const shouldOpen = touch.currentOffset < -OPEN_THRESHOLD;
@@ -101,7 +118,7 @@ function SwipeableExpenseRow({
         className="swipe-expense-main"
         type="button"
         style={{
-          transform: `translateX(${dragOffset ?? (isOpen ? -DELETE_ACTION_WIDTH : 0)}px)`,
+          transform: `translate3d(${dragOffset ?? (isOpen ? -DELETE_ACTION_WIDTH : 0)}px, 0, 0)`,
           transition: dragOffset === null ? undefined : "none",
         }}
         aria-expanded={isOpen}
