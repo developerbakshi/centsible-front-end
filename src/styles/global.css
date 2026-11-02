@@ -93,7 +93,7 @@ button:active {
   inset: 0;
   display: grid;
   place-items: center;
-  background: rgba(67, 75, 72, 0.48);
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   touch-action: none;
@@ -102,10 +102,4 @@ button:active {
 .loading-overlay img {
   width: min(120px, 32vw);
   height: auto;
-}
-
-@media (prefers-color-scheme: dark) {
-  #app .loading-overlay {
-    background: rgba(11, 15, 20, 0.72);
-  }
 }

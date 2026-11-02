@@ -184,6 +184,7 @@ function ExpenseSheet({
           {expense ? (
             <input
               id="expense-date"
+              className="expense-date-control"
               type="date"
               value={date}
               min={minDate}
@@ -193,7 +194,10 @@ function ExpenseSheet({
               disabled
             />
           ) : (
-            <span id="expense-date" className="expense-date-assigned">
+            <span
+              id="expense-date"
+              className="expense-date-control expense-date-assigned"
+            >
               Assigned when saved
             </span>
           )}

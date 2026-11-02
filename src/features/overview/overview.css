@@ -89,6 +89,7 @@
 .settings-button {
   font-size: 22px;
   min-width: 36px;
+  color: var(--acc);
 }
 
 .header-actions {
@@ -143,7 +144,7 @@
 }
 
 .ok {
-  color: var(--ok);
+  color: var(--acc);
 }
 
 .warn {
@@ -181,6 +182,10 @@
 
 .f-ok {
   background: var(--ok);
+}
+
+.hero .f-ok {
+  background: var(--acc);
 }
 
 .f-warn {

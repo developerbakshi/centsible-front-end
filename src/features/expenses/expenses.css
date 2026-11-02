@@ -177,19 +177,34 @@
   -webkit-appearance: none;
   appearance: none;
   display: block;
+  flex: 0 1 160px;
+  width: 160px;
+  max-width: calc(100% - 92px);
   height: 44px;
+  margin: 0;
+  padding: 0;
+  color: var(--ink);
   text-align: right;
+  color-scheme: inherit;
 }
 
 .expense-row input::-webkit-date-and-time-value {
   text-align: right;
 }
 
-.expense-date-assigned {
-  flex: 1;
-  color: var(--mute);
-  font-size: 14px;
+.expense-row .expense-date-control {
+  flex: 0 1 160px;
+  width: 160px;
+  max-width: calc(100% - 92px);
+  min-width: 0;
+  color: var(--ink);
+  font-size: 16px;
   text-align: right;
+}
+
+.expense-date-assigned {
+  color: var(--mute);
+  white-space: nowrap;
 }
 
 input.f {

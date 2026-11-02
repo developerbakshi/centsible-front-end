@@ -57,7 +57,7 @@
 .warnbox {
   padding: 10px 12px;
   border-radius: 12px;
-  background: rgb(194 103 10 / 14%);
+  background: color-mix(in srgb, var(--warn) 14%, transparent);
   color: var(--warn);
   font-size: 14px;
   margin: 8px 0;

@@ -384,10 +384,9 @@ across devices without implementing and verifying those capabilities.
   wired.
 - Settings persist locally only and can be overwritten by API initialization or
   refresh.
-- The native iOS date field has been difficult to size consistently. Current
-  CSS constrains its width and centers the native displayed value, but verify
-  on a real iPhone: desktop/browser width measurements do not establish iOS
-  Safari rendering.
+- The native iOS date field uses a fixed right-aligned value column matching the
+  other expense fields. Verify it on a real iPhone: desktop/browser width
+  measurements do not establish iOS Safari rendering.
 - CORS configuration has previously varied by origin/port. Verify both the
   Vercel production origin and the exact local development origin when API calls
   fail in-browser.
